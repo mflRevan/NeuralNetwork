@@ -12,9 +12,10 @@ namespace Default
 
         public void Reset()
         {
-            if (ActiveTower.TowerObject != null)
+            if (ActiveTower != null && ActiveTower.TowerObject != null)
             {
                 ActiveTower.Destroyed -= OnTowerDestroyed;
+                Destroy(ActiveTower.TowerObject);
             }
 
             Occupied = false;

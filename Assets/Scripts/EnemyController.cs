@@ -34,7 +34,7 @@ namespace Default
             {
                 if (i >= brainOutput.Length / 2)
                 {
-                    delays.Add(brainOutput[i] + 8f);
+                    delays.Add((brainOutput[i] + 8f) / 8f); // i. e. max delay of 2 seconds
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace Default
             for (int i = 0; i < types.Length; i++)
             {
                 var delay = delays[i];
-                var positionLerpValue = positions[i];
+                var positionLerpValue = positions[i] / gameManager.SpawnPoints.Count;
                 var type = types[i];
 
                 var task = SummonUnitDelayed(type, delay, positionLerpValue);

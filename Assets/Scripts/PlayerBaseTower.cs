@@ -1,11 +1,11 @@
-using System;
 using UnityEngine;
-using UnityEngine.UI;
+using System;
 using DG.Tweening;
+using UnityEngine.UI;
 
 namespace Default
 {
-    public class SniperTower : MonoBehaviour, ITower
+    public class PlayerBaseTower : MonoBehaviour, ITower
     {
         public GameManager GameManager { get; set; }
 
@@ -21,8 +21,8 @@ namespace Default
 
         [Header("Config")]
         [SerializeField] private TowerType type;
-        [SerializeField] private float initialHealth = 80f;
-        [SerializeField] private float attackRange = 15f;
+        [SerializeField] private float initialHealth = 300f;
+        [SerializeField] private float attackRange = 20f;
         [SerializeField] private float attackDamage = 70f;
         [SerializeField] private float rechargeTime = 4f;
 
@@ -31,28 +31,38 @@ namespace Default
         private float chargeTimer = 0f;
 
         private Tween attackTween;
+        private bool gameRunning;
 
         private const float ATTACK_ANIMATION_DURATION = 0.4f;
 
 
-        private void Start()
+        public void Initialize(GameManager gameManager)
         {
-            health = initialHealth;
-            chargeTimer = rechargeTime;
+            GameManager = gameManager;
 
-            GameManager.AllAliveTowers.Add(this);
+            Reset();
+            gameRunning = true;
         }
 
         private void Update()
         {
-            HandleRecharge();
+            if (gameRunning)
+            {
+                HandleRecharge();
+            }
         }
 
-        private void OnDestroy()
+        private void Die()
         {
-            GameManager.OnTowerDestroyed(this);
+            GameManager.OnPlayerBaseDestroyed();
 
             this.DOKill();
+        }
+
+        public void Reset()
+        {
+            chargeTimer = rechargeTime;
+            health = initialHealth;
         }
 
         private void HandleRecharge()
@@ -123,8 +133,7 @@ namespace Default
 
             if (health <= 0)
             {
-                Destroyed?.Invoke();
-                Destroy(gameObject);
+                Die();
             }
         }
     }

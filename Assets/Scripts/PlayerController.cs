@@ -8,9 +8,7 @@ namespace Default
     {
         [SerializeField] private GameManager gameManager;
 
-        [SerializeField] private GameObject prepareScreen;
         [SerializeField] private Transform selectionMarker;
-        [SerializeField] private TMP_Text remainingTowersCountText;
         [SerializeField] private GameObject impulseTowerPrefab;
         [SerializeField] private GameObject sniperTowerPrefab;
 
@@ -32,7 +30,6 @@ namespace Default
         public void Reset()
         {
             towerSpotCount = gameManager.TowerSpots.Count;
-            remainingTowersCountText.text = $"Remaining towers to place: {maxTowersToPlace - placedTowersCount}";
 
             if (!randomPlacements)
             {
@@ -40,68 +37,51 @@ namespace Default
             }
         }
 
-        private void StartGame()
-        {
-            var towerSpots = gameManager.TowerSpots;
-            var towerPositions = new float[towerSpots.Count];
-
-            for (int i = 0; i < towerSpots.Count; i++)
-            {
-                var spot = towerSpots[i];
-
-                towerPositions[i] = spot.ActiveTower == null ? 0f : (spot.ActiveTower.Type == TowerType.Impulse ? 1f : 2f);
-            }
-
-            gameManager.StartGame(towerPositions);
-        }
-
         private void Update()
         {
-            if (randomPlacements && gameManager.State != GameManager.GameState.Running)
-            {
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    RandomlyPlaceTowers();
-                    StartGame();
-                }
-            }
-            else if (gameManager.State == GameManager.GameState.Preperation) // pre iteration
-            {
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    currentSelection = null;
-                    selectionMarker.transform.position = Vector3.down * 1000f;
-                    prepareScreen.SetActive(false);
-                    remainingTowersCountText.gameObject.SetActive(false);
+            // if (randomPlacements && gameManager.State != GameManager.GameState.Running)
+            // {
+            //     if (Input.GetKeyDown(KeyCode.Space))
+            //     {
+            //         RandomlyPlaceTowers();
+            //         gameManager.StartGame();
+            //     }
+            // }
+            // else if (gameManager.State == GameManager.GameState.Preperation) // pre iteration
+            // {
+            //     if (Input.GetKeyDown(KeyCode.Space))
+            //     {
+            //         currentSelection = null;
+            //         selectionMarker.transform.position = Vector3.down * 1000f;
 
-                    StartGame();
-                }
+            //         gameManager.StartGame();
+            //     }
 
-                if (Input.GetKeyDown(KeyCode.RightArrow))
-                {
-                    currentSelectionIndex = currentSelectionIndex >= towerSpotCount - 1 ? 0 : currentSelectionIndex + 1;
-                    SelectSpot(currentSelectionIndex);
-                }
+            //     if (Input.GetKeyDown(KeyCode.RightArrow))
+            //     {
+            //         currentSelectionIndex = currentSelectionIndex >= towerSpotCount - 1 ? 0 : currentSelectionIndex + 1;
+            //         SelectSpot(currentSelectionIndex);
+            //     }
 
-                if (Input.GetKeyDown(KeyCode.LeftArrow))
-                {
-                    currentSelectionIndex = currentSelectionIndex <= 0 ? towerSpotCount - 1 : currentSelectionIndex - 1;
-                    SelectSpot(currentSelectionIndex);
-                }
+            //     if (Input.GetKeyDown(KeyCode.LeftArrow))
+            //     {
+            //         currentSelectionIndex = currentSelectionIndex <= 0 ? towerSpotCount - 1 : currentSelectionIndex - 1;
+            //         SelectSpot(currentSelectionIndex);
+            //     }
 
-                if (Input.GetKeyDown(KeyCode.I))
-                {
-                    TryPlaceTower(TowerType.Impulse);
-                }
+            //     if (Input.GetKeyDown(KeyCode.I))
+            //     {
+            //         TryPlaceTower(TowerType.Impulse);
+            //     }
 
-                if (Input.GetKeyDown(KeyCode.S))
-                {
-                    TryPlaceTower(TowerType.Sniper);
-                }
-            }
+            //     if (Input.GetKeyDown(KeyCode.S))
+            //     {
+            //         TryPlaceTower(TowerType.Sniper);
+            //     }
+            // }
         }
 
-        private void RandomlyPlaceTowers()
+        public void RandomlyPlaceTowers()
         {
             var availableSpots = new List<TowerSpot>(gameManager.TowerSpots);
             availableSpots.Shuffle();
@@ -118,9 +98,6 @@ namespace Default
                 SelectSpot(availableSpots[i]);
                 TryPlaceTower(randomTowerType);
             }
-
-            prepareScreen.SetActive(false);
-            remainingTowersCountText.gameObject.SetActive(false);
         }
 
         private void SelectSpot(TowerSpot spot)
@@ -153,7 +130,6 @@ namespace Default
             currentSelection.SetTower(towerInstance);
 
             placedTowersCount++;
-            remainingTowersCountText.text = $"Remaining towers to place: {maxTowersToPlace - placedTowersCount}";
 
             return true;
         }

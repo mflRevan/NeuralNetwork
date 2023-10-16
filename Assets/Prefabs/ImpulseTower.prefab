@@ -51,11 +51,11 @@ MonoBehaviour:
   impulseEffectImage: {fileID: 1804499479315715883}
   impulseEffectColor: {r: 0.8584906, g: 0.54944533, b: 0.1822268, a: 0.70980394}
   type: 0
-  initialHealth: 100
-  attackRange: 13
-  maxDamage: 70
-  minTargets: 5
-  chargeUpTime: 12
+  initialHealth: 200
+  attackRange: 15
+  maxDamage: 45
+  minTargets: 4
+  chargeUpTime: 8
 --- !u!1 &1871450466615555896
 GameObject:
   m_ObjectHideFlags: 0

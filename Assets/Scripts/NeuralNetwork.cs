@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using System;
 
-/// <summary>
-/// Neural Network C# (Unsupervised)
-/// </summary>
 public class NeuralNetwork : IComparable<NeuralNetwork>
 {
     public int[] layers; //layers
@@ -25,7 +22,6 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
             this.layers[i] = layers[i];
         }
 
-
         //generate matrix
         InitNeurons();
         InitWeights();
@@ -38,7 +34,6 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
         InitWeights();
         CopyWeights(data.Network.weights);
     }
-
 
     /// <summary>
     /// Deep copy constructor 
@@ -62,7 +57,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     /// </summary>
     /// <param name="otherParent">Other mate</param>
     /// <returns>Returns the child of the two networks!</returns>
-    public NeuralNetwork Crossover(NeuralNetwork otherParent)
+    public NeuralNetwork Crossover(NeuralNetwork otherParent, float otherParentGeneticSuperiority = 0.5f)
     {
         NeuralNetwork child = new NeuralNetwork(this.layers);
 
@@ -72,7 +67,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
             {
                 for (int k = 0; k < weights[i][j].Length; k++)
                 {
-                    child.weights[i][j][k] = UnityEngine.Random.value < 0.5f ? this.weights[i][j][k] : otherParent.weights[i][j][k];
+                    child.weights[i][j][k] = UnityEngine.Random.value < otherParentGeneticSuperiority ? otherParent.weights[i][j][k] : this.weights[i][j][k];
                 }
             }
         }
@@ -116,12 +111,12 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     private void InitWeights()
     {
 
-        List<float[][]> weightsList = new List<float[][]>(); //weights list which will later will converted into a weights 3D array
+        List<float[][]> weightsList = new(); //weights list which will later will converted into a weights 3D array
 
         //itterate over all neurons that have a weight connection
         for (int i = 1; i < layers.Length; i++)
         {
-            List<float[]> layerWeightsList = new List<float[]>(); //layer weight list for this current layer (will be converted to 2D array)
+            List<float[]> layerWeightsList = new(); //layer weight list for this current layer (will be converted to 2D array)
 
             int neuronsInPreviousLayer = layers[i - 1];
 
@@ -200,24 +195,20 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
                     float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
                     if (randomNumber <= 2f)
-                    { //if 1
-                      //flip sign of weight
+                    {
                         weight *= -1f;
                     }
                     else if (randomNumber <= 4f)
-                    { //if 2
-                      //pick random weight between -1 and 1
+                    {
                         weight = UnityEngine.Random.Range(-0.5f, 0.5f);
                     }
                     else if (randomNumber <= 6f)
-                    { //if 3
-                      //randomly increase by 0% to 100%
+                    {
                         float factor = UnityEngine.Random.Range(0f, 1f) + 1f;
                         weight *= factor;
                     }
                     else if (randomNumber <= 8f)
-                    { //if 4
-                      //randomly decrease by 0% to 100%
+                    {
                         float factor = UnityEngine.Random.Range(0f, 1f);
                         weight *= factor;
                     }

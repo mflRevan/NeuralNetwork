@@ -51,10 +51,10 @@ MonoBehaviour:
   healthBar: {fileID: 6960521864900628425}
   rechargeBar: {fileID: 4476933901894751793}
   type: 1
-  initialHealth: 70
+  initialHealth: 90
   attackRange: 15
   attackDamage: 70
-  rechargeTime: 4
+  rechargeTime: 3
 --- !u!1 &1421203121135402974
 GameObject:
   m_ObjectHideFlags: 0

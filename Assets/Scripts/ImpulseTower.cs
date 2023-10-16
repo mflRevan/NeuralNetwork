@@ -38,6 +38,7 @@ namespace Default
         private void Start()
         {
             health = initialHealth;
+            chargeTimer = chargeUpTime;
 
             GameManager.AllAliveTowers.Add(this);
         }

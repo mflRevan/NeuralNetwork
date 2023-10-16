@@ -44,7 +44,6 @@ namespace Default
         private void OnDestroy()
         {
             GameManager.OnEnemyUnitKilled(this);
-            GameManager.AllAliveEnemies.Remove(this);
         }
 
         private void Update()
