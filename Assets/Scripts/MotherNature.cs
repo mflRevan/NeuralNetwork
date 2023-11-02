@@ -21,7 +21,7 @@ namespace Default
         [SerializeField] private TMP_Text generationOutputText;
 
         [Header("Config")]
-        [SerializeField, Range(1f, 4f)] private float timeScale = 1f;
+        [SerializeField, Range(1f, 10f)] private float timeScale = 1f;
         [SerializeField] private bool startWithNewNetworkInstances = true;
         [SerializeField] private int numberOfGenerations;
         [SerializeField] private float playerBaseDestroyedReward = 7f;

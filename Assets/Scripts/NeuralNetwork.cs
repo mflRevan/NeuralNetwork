@@ -29,7 +29,7 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
 
     public NeuralNetwork(NeuralNetworkData data)
     {
-        this.layers = data.Network.layers; // Assuming Network is a public field in the NeuralNetworkData
+        this.layers = data.Network.layers;
         InitNeurons();
         InitWeights();
         CopyWeights(data.Network.weights);
