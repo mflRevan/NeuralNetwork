@@ -28,9 +28,54 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             ""id"": ""ce31afac-8c12-415b-a209-4c907c0a90f3"",
             ""actions"": [
                 {
-                    ""name"": ""MouseClick"",
+                    ""name"": ""Cannon"",
                     ""type"": ""Button"",
                     ""id"": ""827a05be-8b0a-4be5-98d1-e6d0123ec5ec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Stomper"",
+                    ""type"": ""Button"",
+                    ""id"": ""fef5ed22-2055-4147-ac0d-5f04d92d655e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Mortar"",
+                    ""type"": ""Button"",
+                    ""id"": ""4210edfd-1371-46a9-a312-2d5146f61d73"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Resource"",
+                    ""type"": ""Button"",
+                    ""id"": ""40c27727-d526-4f68-843b-b2c7ceeacdbc"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Blank"",
+                    ""type"": ""Button"",
+                    ""id"": ""f4645366-ca6a-44f6-9d39-a4a0a6bdfcf6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Clear"",
+                    ""type"": ""Button"",
+                    ""id"": ""54aa817b-a32d-4516-a40b-2451ab796e3c"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -41,28 +86,82 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""d4583348-de94-4247-8481-6fc356abe100"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/c"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Player"",
-                    ""action"": ""MouseClick"",
+                    ""groups"": """",
+                    ""action"": ""Cannon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""34338dff-5294-4748-9dbf-5e254efed59a"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Mortar"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5ac1c524-4f6c-4050-8ac6-62c12a062a58"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Resource"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8c366e94-5f3c-4f88-b975-990709bf5048"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Blank"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ada7ef3c-90fb-47b8-a662-d25ba25610b9"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Clear"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""426404ab-c4fe-4656-ad63-74f62a64d9c2"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Stomper"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
             ]
         }
     ],
-    ""controlSchemes"": [
-        {
-            ""name"": ""Player"",
-            ""bindingGroup"": ""Player"",
-            ""devices"": []
-        }
-    ]
+    ""controlSchemes"": []
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_MouseClick = m_Player.FindAction("MouseClick", throwIfNotFound: true);
+        m_Player_Cannon = m_Player.FindAction("Cannon", throwIfNotFound: true);
+        m_Player_Stomper = m_Player.FindAction("Stomper", throwIfNotFound: true);
+        m_Player_Mortar = m_Player.FindAction("Mortar", throwIfNotFound: true);
+        m_Player_Resource = m_Player.FindAction("Resource", throwIfNotFound: true);
+        m_Player_Blank = m_Player.FindAction("Blank", throwIfNotFound: true);
+        m_Player_Clear = m_Player.FindAction("Clear", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -124,12 +223,22 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     // Player
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
-    private readonly InputAction m_Player_MouseClick;
+    private readonly InputAction m_Player_Cannon;
+    private readonly InputAction m_Player_Stomper;
+    private readonly InputAction m_Player_Mortar;
+    private readonly InputAction m_Player_Resource;
+    private readonly InputAction m_Player_Blank;
+    private readonly InputAction m_Player_Clear;
     public struct PlayerActions
     {
         private @InputActions m_Wrapper;
         public PlayerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @MouseClick => m_Wrapper.m_Player_MouseClick;
+        public InputAction @Cannon => m_Wrapper.m_Player_Cannon;
+        public InputAction @Stomper => m_Wrapper.m_Player_Stomper;
+        public InputAction @Mortar => m_Wrapper.m_Player_Mortar;
+        public InputAction @Resource => m_Wrapper.m_Player_Resource;
+        public InputAction @Blank => m_Wrapper.m_Player_Blank;
+        public InputAction @Clear => m_Wrapper.m_Player_Clear;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -139,16 +248,46 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
-            @MouseClick.started += instance.OnMouseClick;
-            @MouseClick.performed += instance.OnMouseClick;
-            @MouseClick.canceled += instance.OnMouseClick;
+            @Cannon.started += instance.OnCannon;
+            @Cannon.performed += instance.OnCannon;
+            @Cannon.canceled += instance.OnCannon;
+            @Stomper.started += instance.OnStomper;
+            @Stomper.performed += instance.OnStomper;
+            @Stomper.canceled += instance.OnStomper;
+            @Mortar.started += instance.OnMortar;
+            @Mortar.performed += instance.OnMortar;
+            @Mortar.canceled += instance.OnMortar;
+            @Resource.started += instance.OnResource;
+            @Resource.performed += instance.OnResource;
+            @Resource.canceled += instance.OnResource;
+            @Blank.started += instance.OnBlank;
+            @Blank.performed += instance.OnBlank;
+            @Blank.canceled += instance.OnBlank;
+            @Clear.started += instance.OnClear;
+            @Clear.performed += instance.OnClear;
+            @Clear.canceled += instance.OnClear;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
         {
-            @MouseClick.started -= instance.OnMouseClick;
-            @MouseClick.performed -= instance.OnMouseClick;
-            @MouseClick.canceled -= instance.OnMouseClick;
+            @Cannon.started -= instance.OnCannon;
+            @Cannon.performed -= instance.OnCannon;
+            @Cannon.canceled -= instance.OnCannon;
+            @Stomper.started -= instance.OnStomper;
+            @Stomper.performed -= instance.OnStomper;
+            @Stomper.canceled -= instance.OnStomper;
+            @Mortar.started -= instance.OnMortar;
+            @Mortar.performed -= instance.OnMortar;
+            @Mortar.canceled -= instance.OnMortar;
+            @Resource.started -= instance.OnResource;
+            @Resource.performed -= instance.OnResource;
+            @Resource.canceled -= instance.OnResource;
+            @Blank.started -= instance.OnBlank;
+            @Blank.performed -= instance.OnBlank;
+            @Blank.canceled -= instance.OnBlank;
+            @Clear.started -= instance.OnClear;
+            @Clear.performed -= instance.OnClear;
+            @Clear.canceled -= instance.OnClear;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -166,17 +305,13 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         }
     }
     public PlayerActions @Player => new PlayerActions(this);
-    private int m_PlayerSchemeIndex = -1;
-    public InputControlScheme PlayerScheme
-    {
-        get
-        {
-            if (m_PlayerSchemeIndex == -1) m_PlayerSchemeIndex = asset.FindControlSchemeIndex("Player");
-            return asset.controlSchemes[m_PlayerSchemeIndex];
-        }
-    }
     public interface IPlayerActions
     {
-        void OnMouseClick(InputAction.CallbackContext context);
+        void OnCannon(InputAction.CallbackContext context);
+        void OnStomper(InputAction.CallbackContext context);
+        void OnMortar(InputAction.CallbackContext context);
+        void OnResource(InputAction.CallbackContext context);
+        void OnBlank(InputAction.CallbackContext context);
+        void OnClear(InputAction.CallbackContext context);
     }
 }

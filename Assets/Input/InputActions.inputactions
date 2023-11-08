@@ -6,9 +6,54 @@
             "id": "ce31afac-8c12-415b-a209-4c907c0a90f3",
             "actions": [
                 {
-                    "name": "MouseClick",
+                    "name": "Cannon",
                     "type": "Button",
                     "id": "827a05be-8b0a-4be5-98d1-e6d0123ec5ec",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Stomper",
+                    "type": "Button",
+                    "id": "fef5ed22-2055-4147-ac0d-5f04d92d655e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Mortar",
+                    "type": "Button",
+                    "id": "4210edfd-1371-46a9-a312-2d5146f61d73",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Resource",
+                    "type": "Button",
+                    "id": "40c27727-d526-4f68-843b-b2c7ceeacdbc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Blank",
+                    "type": "Button",
+                    "id": "f4645366-ca6a-44f6-9d39-a4a0a6bdfcf6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Clear",
+                    "type": "Button",
+                    "id": "54aa817b-a32d-4516-a40b-2451ab796e3c",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -19,22 +64,71 @@
                 {
                     "name": "",
                     "id": "d4583348-de94-4247-8481-6fc356abe100",
-                    "path": "",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Player",
-                    "action": "MouseClick",
+                    "groups": "",
+                    "action": "Cannon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "34338dff-5294-4748-9dbf-5e254efed59a",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Mortar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5ac1c524-4f6c-4050-8ac6-62c12a062a58",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Resource",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c366e94-5f3c-4f88-b975-990709bf5048",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blank",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ada7ef3c-90fb-47b8-a662-d25ba25610b9",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Clear",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "426404ab-c4fe-4656-ad63-74f62a64d9c2",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Stomper",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
             ]
         }
     ],
-    "controlSchemes": [
-        {
-            "name": "Player",
-            "bindingGroup": "Player",
-            "devices": []
-        }
-    ]
+    "controlSchemes": []
 }

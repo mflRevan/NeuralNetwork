@@ -1,15 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NeuralNetworkData", menuName = "Neural Network/Data")]
-public class NeuralNetworkData : ScriptableObject
+namespace Default
 {
-    public int[] layers;
-    public float[][][] weights;
-
-    public NeuralNetwork Network;
-
-    public void StoreNetwork(NeuralNetwork network)
+    [CreateAssetMenu(fileName = "NeuralNetworkData", menuName = "Neural Network/Data")]
+    public class NeuralNetworkData : ScriptableObject
     {
-        Network = new NeuralNetwork(network);
+        public NeuralNetwork Network;
+
+        public void StoreNetwork(NeuralNetwork network)
+        {
+            Network = new NeuralNetwork(network);
+        }
     }
 }
