@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -9,6 +10,7 @@ namespace Default
         public static List<Cell> Grid { get; private set; }
 
         [SerializeField] private List<Cell> grid;
+        [SerializeField] private RenderTexture mapRenderTexture;
         [SerializeField] private TrainingDatabase database;
 
         [Header("Buildings")]
@@ -28,7 +30,7 @@ namespace Default
         {
             for (int i = 0; i < grid.Count; i++)
             {
-                switch (mapData.list[i])
+                switch (mapData.Grid[i])
                 {
                     case (int)BuildingType.Empty:
                         // empty
@@ -82,14 +84,16 @@ namespace Default
 
         public void SaveCurrentMapData()
         {
-            MapData mapData = new();
+            var gridList = new List<int>();
 
             foreach (var cell in grid)
             {
                 var b = cell.GetActiveBuilding();
 
-                mapData.list.Add(b == null ? 0 : (int)b.Type);
+                gridList.Add(b == null ? 0 : (int)b.Type);
             }
+
+            var mapData = new MapData(gridList);
 
             database.Maps.Add(mapData);
         }
