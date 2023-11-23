@@ -150,6 +150,98 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Driver"",
+            ""id"": ""7ca419c2-d9f2-4151-a66c-6a0f9de21d38"",
+            ""actions"": [
+                {
+                    ""name"": ""DriveInput"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""5fc52f0c-bf08-4f67-9bc0-41b5cb6fb0df"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Brake"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""1b95d4e7-6d03-4a5e-9810-3bb44a674d8f"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""b4615dbb-e866-4c02-b223-a9176635ae08"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""744f60f1-d94f-4004-9839-b977c7290e03"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""64283432-e986-41a9-9b7d-43c7210bf7dc"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""4156d2e7-be3f-47eb-bfaf-f143d7cd350c"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""acaf77d8-a65f-4ed8-b5d1-0d11ca8b3123"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""883465a2-739e-4ba3-9c2c-ff1739069b63"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Brake"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -162,6 +254,10 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_Player_Resource = m_Player.FindAction("Resource", throwIfNotFound: true);
         m_Player_Blank = m_Player.FindAction("Blank", throwIfNotFound: true);
         m_Player_Clear = m_Player.FindAction("Clear", throwIfNotFound: true);
+        // Driver
+        m_Driver = asset.FindActionMap("Driver", throwIfNotFound: true);
+        m_Driver_DriveInput = m_Driver.FindAction("DriveInput", throwIfNotFound: true);
+        m_Driver_Brake = m_Driver.FindAction("Brake", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -305,6 +401,60 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         }
     }
     public PlayerActions @Player => new PlayerActions(this);
+
+    // Driver
+    private readonly InputActionMap m_Driver;
+    private List<IDriverActions> m_DriverActionsCallbackInterfaces = new List<IDriverActions>();
+    private readonly InputAction m_Driver_DriveInput;
+    private readonly InputAction m_Driver_Brake;
+    public struct DriverActions
+    {
+        private @InputActions m_Wrapper;
+        public DriverActions(@InputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @DriveInput => m_Wrapper.m_Driver_DriveInput;
+        public InputAction @Brake => m_Wrapper.m_Driver_Brake;
+        public InputActionMap Get() { return m_Wrapper.m_Driver; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(DriverActions set) { return set.Get(); }
+        public void AddCallbacks(IDriverActions instance)
+        {
+            if (instance == null || m_Wrapper.m_DriverActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_DriverActionsCallbackInterfaces.Add(instance);
+            @DriveInput.started += instance.OnDriveInput;
+            @DriveInput.performed += instance.OnDriveInput;
+            @DriveInput.canceled += instance.OnDriveInput;
+            @Brake.started += instance.OnBrake;
+            @Brake.performed += instance.OnBrake;
+            @Brake.canceled += instance.OnBrake;
+        }
+
+        private void UnregisterCallbacks(IDriverActions instance)
+        {
+            @DriveInput.started -= instance.OnDriveInput;
+            @DriveInput.performed -= instance.OnDriveInput;
+            @DriveInput.canceled -= instance.OnDriveInput;
+            @Brake.started -= instance.OnBrake;
+            @Brake.performed -= instance.OnBrake;
+            @Brake.canceled -= instance.OnBrake;
+        }
+
+        public void RemoveCallbacks(IDriverActions instance)
+        {
+            if (m_Wrapper.m_DriverActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IDriverActions instance)
+        {
+            foreach (var item in m_Wrapper.m_DriverActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_DriverActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public DriverActions @Driver => new DriverActions(this);
     public interface IPlayerActions
     {
         void OnCannon(InputAction.CallbackContext context);
@@ -313,5 +463,10 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         void OnResource(InputAction.CallbackContext context);
         void OnBlank(InputAction.CallbackContext context);
         void OnClear(InputAction.CallbackContext context);
+    }
+    public interface IDriverActions
+    {
+        void OnDriveInput(InputAction.CallbackContext context);
+        void OnBrake(InputAction.CallbackContext context);
     }
 }

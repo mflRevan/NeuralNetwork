@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 7afc546e5cc350d48bd7833a1e15f56e
+AudioImporter:
+  serializedVersion: 5
+  format: -1
+  loadType: 1
+  quality: .435000002
+  sampleRate: 0
+  forceToMono: 0
+  preloadAudioData: 1
+  loadInBackground: 0
+  overrideSampleRate: 0
+  optimizeSampleRate: 0
+  3D: 1
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Sounds/Brake1.wav
+  uploadId: 104771

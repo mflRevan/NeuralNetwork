@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac375dc36289de94181575d51096d152
+timeCreated: 1450662960
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Perfabs/Vahicles/PoliceCar.prefab
+  uploadId: 104771

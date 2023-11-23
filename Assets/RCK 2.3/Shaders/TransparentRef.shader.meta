@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: eb82cbeb20d639748831701626fa9ff3
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Shaders/TransparentRef.shader
+  uploadId: 104771

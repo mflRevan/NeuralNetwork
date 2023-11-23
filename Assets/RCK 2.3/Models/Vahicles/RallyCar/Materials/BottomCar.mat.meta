@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a059bc4fd2fee454ab9145e71e03deca
+timeCreated: 1426310459
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Models/Vahicles/RallyCar/Materials/BottomCar.mat
+  uploadId: 104771

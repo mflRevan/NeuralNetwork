@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 2a414371c337cc04f91316d5626bf449
+TrueTypeFontImporter:
+  serializedVersion: 2
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 1
+  characterPadding: 0
+  includeFontData: 1
+  use2xBehaviour: 0
+  fontNames: []
+  customCharacters: 
+  fontRenderingMode: 0
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/GUIs/Other/Lightdot-16x10.ttf
+  uploadId: 104771

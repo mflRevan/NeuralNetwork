@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ce5b83418f3c88d4fa6c6b5ab9b17cb0
+timeCreated: 1433086547
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Models/Vahicles/PoliceCar/Materials/glass.mat
+  uploadId: 104771

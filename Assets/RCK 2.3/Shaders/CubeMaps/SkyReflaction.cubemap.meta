@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: c8fb6b23ad805e34991b8ba7585c5032
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Shaders/CubeMaps/SkyReflaction.cubemap
+  uploadId: 104771

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ab70c098a52a04be88096d20e1540cb8
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18421
+  packageName: Realistic Car Kit
+  packageVersion: 2.3
+  assetPath: Assets/RCK 2.3/Standard Assets/Projectors/Sources/Shaders/Projector
+    Light.shader
+  uploadId: 104771
