@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: adce9d732daa5b44da276fa557589ba0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/ModelMoundIce.prefab
+  uploadId: 520988

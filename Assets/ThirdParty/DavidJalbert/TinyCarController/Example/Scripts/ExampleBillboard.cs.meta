@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e6529ed4319e01745929e6d933b5fc48
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Scripts/ExampleBillboard.cs
+  uploadId: 520988

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8c9b0ecb108e8964a90e4026857b0edb
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Components/TinyCarMobileInput.cs
+  uploadId: 520988

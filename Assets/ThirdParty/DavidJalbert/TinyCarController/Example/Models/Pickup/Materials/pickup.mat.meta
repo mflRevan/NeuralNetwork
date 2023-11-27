@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bbc2b5bc2152f534988bf3f5a2eef82d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/Pickup/Materials/pickup.mat
+  uploadId: 520988

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1ca5bae1e9b83e14c98f6c2ba2518a4b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Materials/Bomb.mat
+  uploadId: 520988

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6a6b199a78ed39a4f9189f1e7ca6d5e0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Scripts/ExampleGui.cs
+  uploadId: 520988

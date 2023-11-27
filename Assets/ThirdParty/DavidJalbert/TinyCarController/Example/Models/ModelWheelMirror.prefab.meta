@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c000f3acaf94f7c43a28e5626cc57064
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/ModelWheelMirror.prefab
+  uploadId: 520988

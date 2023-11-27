@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e5922202685028a48b5984b5aa0a2494
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/ModelWheel.prefab
+  uploadId: 520988

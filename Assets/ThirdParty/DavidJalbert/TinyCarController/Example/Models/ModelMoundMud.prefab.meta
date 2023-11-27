@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5f5869f70f76e074891aecba4ed53d5a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/ModelMoundMud.prefab
+  uploadId: 520988

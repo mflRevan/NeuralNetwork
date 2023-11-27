@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 66c840260c5fb1f449565510ac1f251d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Models/ModelPickup.prefab
+  uploadId: 520988

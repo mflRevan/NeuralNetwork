@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6b10491741e124643afa30edb1eaffe6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Materials/Smoke.mat
+  uploadId: 520988

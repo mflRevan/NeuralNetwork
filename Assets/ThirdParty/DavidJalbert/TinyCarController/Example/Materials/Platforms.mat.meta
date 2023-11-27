@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 28882e330415f0148b40d2d0d92c78c2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151827
+  packageName: Tiny Car Controller
+  packageVersion: 1.7.1
+  assetPath: Assets/DavidJalbert/TinyCarController/Example/Materials/Platforms.mat
+  uploadId: 520988
