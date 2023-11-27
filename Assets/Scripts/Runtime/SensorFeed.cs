@@ -5,9 +5,9 @@ namespace Default
 {
     public class SensorFeed : MonoBehaviour
     {
-        public const float RANGE_FORWARD = 50f;
+        public const float RANGE_FORWARD = 60f;
         public const float RANGE_SIDE = 20f;
-        public const float RANGE_BACKWARD = 30f;
+        public const float RANGE_BACKWARD = 40f;
 
         [SerializeField] private List<Sensor> sensors;
         public List<Sensor> Sensors => sensors;

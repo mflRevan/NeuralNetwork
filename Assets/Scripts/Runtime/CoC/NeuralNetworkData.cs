@@ -8,12 +8,16 @@ namespace Default
     public class NeuralNetworkData : ScriptableObject
     {
         public NeuralNetwork FittestNetwork;
-        public List<float[]> TrainingDataset;
 
 
         public void StoreNetwork(NeuralNetwork network)
         {
             FittestNetwork = new NeuralNetwork(network);
+        }
+
+        public void CreateNeuralNetwork(int[] layers)
+        {
+            FittestNetwork = new NeuralNetwork(layers);
         }
     }
 

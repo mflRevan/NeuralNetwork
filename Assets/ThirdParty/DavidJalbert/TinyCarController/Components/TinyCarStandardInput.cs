@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Default;
 using UnityEngine;
 
 namespace DavidJalbert
@@ -7,6 +6,8 @@ namespace DavidJalbert
     public class TinyCarStandardInput : MonoBehaviour
     {
         public TinyCarController carController;
+        public AICarController aiController;
+        public NeuralNetworkData data;
 
         public enum InputType
         {
@@ -48,9 +49,15 @@ namespace DavidJalbert
 
         private float boostTimer = 0;
 
+
         void Start()
         {
             InputEnabled = inputEnabledFromStart;
+
+            if (InputEnabled)
+            {
+                aiController.EnableDrivingAI(false);
+            }
         }
 
         void Update()
@@ -63,18 +70,38 @@ namespace DavidJalbert
             float motorDelta = getInput(forwardInput) - getInput(reverseInput);
             float steeringDelta = getInput(steerRightInput) - getInput(steerLeftInput);
 
-            if (getInput(boostInput) == 1 && boostTimer == 0)
-            {
-                boostTimer = boostCoolOff + boostDuration;
-            }
-            else if (boostTimer > 0)
-            {
-                boostTimer = Mathf.Max(boostTimer - Time.deltaTime, 0);
-                carController.setBoostMultiplier(boostTimer > boostCoolOff ? boostMultiplier : 1);
-            }
 
-            carController.setSteering(steeringDelta);
+            // if (getInput(boostInput) == 1 && boostTimer == 0)
+            // {
+            //     boostTimer = boostCoolOff + boostDuration;
+            // }
+            // else if (boostTimer > 0)
+            // {
+            //     boostTimer = Mathf.Max(boostTimer - Time.deltaTime, 0);
+            //     carController.setBoostMultiplier(boostTimer > boostCoolOff ? boostMultiplier : 1);
+            // }
+
             carController.setMotor(motorDelta);
+            carController.setSteering(steeringDelta);
+            carController.setBoostMultiplier(getInput(boostInput) == 1 ? boostMultiplier : 1);
+        }
+
+        // create training sequence using unitask and dotween and NeuralNetwork.Train()
+        private (float[], float[]) CollectTrainingDataFromCurrentFrame()
+        {
+            // desired output (corresponds to the human input )
+            var desiredOutput = new float[5];
+
+            desiredOutput[0] = getInput(forwardInput);
+            desiredOutput[1] = getInput(reverseInput);
+            desiredOutput[2] = getInput(steerRightInput);
+            desiredOutput[3] = getInput(steerLeftInput);
+            desiredOutput[4] = getInput(boostInput);
+
+            // training input (processed environment data)
+            var trainingInput = aiController.ProcessAndUpdateEnvironmentData();
+
+            return (trainingInput, desiredOutput);
         }
 
         public float getInput(InputValue v)

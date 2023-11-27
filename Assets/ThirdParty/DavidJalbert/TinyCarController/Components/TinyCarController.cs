@@ -259,7 +259,11 @@ namespace DavidJalbert
             // velocity
             if (onGround)
             {
-                if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity)) velocity -= crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime * surfaceParameters.forwardFrictionMultiplier);
+                if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity))
+                {
+                    velocity -= crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime * surfaceParameters.forwardFrictionMultiplier);
+                }
+
                 velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime * surfaceParameters.lateralFrictionMultiplier);
 
                 float slopeMultiplier = Mathf.Max(0, (Mathf.Sign(motor) * slopeDelta * slopeFriction * scaleAdjustment + 1f));

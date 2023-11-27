@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 
 namespace Default
 {
@@ -30,12 +31,7 @@ namespace Default
         /// <param name="layers">layers to the neural network</param>
         public NeuralNetwork(int[] layers)
         {
-            //deep copy of layers of this network 
-            this.layers = new int[layers.Length];
-            for (int i = 0; i < layers.Length; i++)
-            {
-                this.layers[i] = layers[i];
-            }
+            this.layers = layers;
 
             //generate matrix
             InitNeurons();
@@ -203,15 +199,24 @@ namespace Default
         /// <summary>
         /// Train the underlying network using backpropagation 
         /// </summary>
-        public void Train(float[][] trainingInputs, float[][] trainingOutputs)
+        public async UniTask Train(List<(float[], float[])> trainingData)
         {
-            for (var i = 0; i < trainingInputs.Length; i++)
+            for (var i = 0; i < trainingData.Count; i++)
             {
-                FeedForward(trainingInputs[i]);
+                (float[] trainingInputs, float[] trainingOutputs) = trainingData[i];
 
+                if (FeedForward(trainingInputs) == null) // feed forward data, but if invalid training data, discontinue training
+                {
+                    return;
+                }
+
+                // set desired output from trainingdata to backpropagate
                 for (var j = 0; j < desiredNeurons[desiredNeurons.Length - 1].Length; j++)
-                    desiredNeurons[desiredNeurons.Length - 1][j] = trainingOutputs[i][j];
+                {
+                    desiredNeurons[desiredNeurons.Length - 1][j] = trainingOutputs[j];
+                }
 
+                // calculate how much to smudge the weight and bias of each and every neuron and weight connection
                 for (var j = neurons.Length - 1; j >= 1; j--)
                 {
                     for (var k = 0; k < neurons[j].Length; k++)
@@ -250,6 +255,8 @@ namespace Default
                     desiredNeurons[i][j] = 0;
                 }
             }
+
+            await UniTask.Yield(); // dont block the main thread
         }
 
         /// <summary>
@@ -259,6 +266,12 @@ namespace Default
         /// <returns></returns>
         public float[] FeedForward(float[] inputs)
         {
+            if (inputs.Length != layers[0])
+            {
+                Debug.LogError($"Inputs length ({inputs.Length}) does not match input neurons count ({neurons.Length})!");
+                return null;
+            }
+
             //Add inputs to the neuron matrix
             for (var i = 0; i < neurons[0].Length; i++) neurons[0][i] = inputs[i];
 
