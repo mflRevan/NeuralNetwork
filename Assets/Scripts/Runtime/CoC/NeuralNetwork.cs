@@ -22,21 +22,23 @@ namespace Default
         private float[][] biasesSmudge;
         private float[][][] weightsSmudge;
 
-        [SerializeField] private float fitness; //fitness of the network
+        [SerializeField] private float fitness = 0f; //fitness of the network
 
 
         /// <summary>
         /// Initilizes a neural network with random weights
         /// </summary>
         /// <param name="layers">layers to the neural network</param>
-        public NeuralNetwork(int[] layers)
+        public NeuralNetwork(int[] layers, bool randomBiases = false)
         {
             this.layers = layers;
 
             //generate matrix
             InitNeurons();
             InitWeights();
-            InitBiases();
+            InitBiases(randomBiases);
+
+            fitness = 0f;
         }
 
         /// <summary>
@@ -54,9 +56,11 @@ namespace Default
 
             InitNeurons();
             InitWeights();
-            InitBiases();
+            InitBiases(false);
             CopyWeights(copyNetwork.weights);
             CopyBiases(copyNetwork.biases);
+
+            fitness = copyNetwork.GetFitness();
         }
 
         /// <summary>
@@ -139,13 +143,21 @@ namespace Default
         /// <summary>
         /// Create Biases Matrix
         /// </summary>
-        private void InitBiases()
+        private void InitBiases(bool randomBiases)
         {
             List<float[]> biasList = new();
 
             for (int i = 0; i < layers.Length; i++) //run through all layers
             {
                 biasList.Add(new float[layers[i]]); //add layer to bias list
+
+                if (randomBiases)
+                {
+                    for (int j = 0; j < biasList[i].Length; j++)
+                    {
+                        biasList[i][j] = UnityEngine.Random.Range(-0.5f, 0.5f);
+                    }
+                }
             }
 
             var biasArray = biasList.ToArray();
@@ -159,6 +171,7 @@ namespace Default
         /// </summary>
         private void InitWeights()
         {
+            var xavierInit = XavierInitialization(layers[0], layers[layers.Length - 1]);
 
             List<float[][]> weightsList = new(); //weights list which will later will converted into a weights 3D array
             List<float[][]> weightsSmudgeList = new(); //smudge list format only 
@@ -180,8 +193,8 @@ namespace Default
                     //itterate over all neurons in the previous layer and set the weights randomly between 0.5f and -0.5
                     for (int k = 0; k < neuronsInPreviousLayer; k++)
                     {
-                        //give random weights to neuron weights
-                        neuronWeights[k] = UnityEngine.Random.Range(-0.5f, 0.5f);
+                        //give random weights to neuron weights in the range of the xavier init function
+                        neuronWeights[k] = UnityEngine.Random.Range(-xavierInit, xavierInit);
                     }
 
                     layerWeightsList.Add(neuronWeights); //add neuron weights of this current layer to layer weights
@@ -199,13 +212,13 @@ namespace Default
         /// <summary>
         /// Train the underlying network using backpropagation 
         /// </summary>
-        public async UniTask Train(List<(float[], float[])> trainingData)
+        public async UniTask Train(List<Dataset> trainingData)
         {
             for (var i = 0; i < trainingData.Count; i++)
             {
-                (float[] trainingInputs, float[] trainingOutputs) = trainingData[i];
+                var dataset = trainingData[i];
 
-                if (FeedForward(trainingInputs) == null) // feed forward data, but if invalid training data, discontinue training
+                if (FeedForward(dataset.Inputs) == null) // feed forward data, but if invalid training data, discontinue training
                 {
                     return;
                 }
@@ -213,7 +226,7 @@ namespace Default
                 // set desired output from trainingdata to backpropagate
                 for (var j = 0; j < desiredNeurons[desiredNeurons.Length - 1].Length; j++)
                 {
-                    desiredNeurons[desiredNeurons.Length - 1][j] = trainingOutputs[j];
+                    desiredNeurons[desiredNeurons.Length - 1][j] = dataset.Outputs[j];
                 }
 
                 // calculate how much to smudge the weight and bias of each and every neuron and weight connection
@@ -304,8 +317,14 @@ namespace Default
             return 0.2f * x + 0.5f;
         }
 
+        // determines the weight randomization range according to the Xavier (Glorot) Initialization, which considers the input and output size of the network
+        private static float XavierInitialization(int numberInputNeurons, int numberOutputNeurons)
+        {
+            return Mathf.Sqrt(6f / (numberInputNeurons + numberOutputNeurons));
+        }
+
         /// <summary>
-        /// Mutate neural network weights
+        /// Mutate neural network weights and biases
         /// </summary>
         public void Mutate()
         {
@@ -330,17 +349,41 @@ namespace Default
                         }
                         else if (randomNumber <= 6f)
                         {
-                            float factor = UnityEngine.Random.Range(0f, 1f) + 1f;
-                            weight *= factor;
+                            weight *= UnityEngine.Random.Range(1f, 2f);
                         }
                         else if (randomNumber <= 8f)
                         {
-                            float factor = UnityEngine.Random.Range(0f, 1f);
-                            weight *= factor;
+                            weight *= UnityEngine.Random.Range(0f, 1f);
                         }
 
                         weights[i][j][k] = weight;
                     }
+                }
+            }
+
+            for (int i = 0; i < biases.Length; i++)
+            {
+                for (int j = 0; j < biases[i].Length; j++)
+                {
+                    float bias = biases[i][j];
+
+                    //mutate bias value 
+                    float randomNumber = UnityEngine.Random.Range(0f, 100f);
+
+                    if (randomNumber <= 1f)
+                    {
+                        bias *= -1f;
+                    }
+                    else if (randomNumber <= 3f)
+                    {
+                        bias = UnityEngine.Random.Range(-0.5f, 0.5f);
+                    }
+                    else if (randomNumber <= 5f)
+                    {
+                        bias += UnityEngine.Random.Range(-1f, 1f);
+                    }
+
+                    biases[i][j] = bias;
                 }
             }
         }

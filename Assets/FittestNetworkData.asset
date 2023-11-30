@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b316a99ff3af594ead926a6b2beae46, type: 3}
   m_Name: FittestNetworkData
   m_EditorClassIdentifier: 
-  Network:
-    layers: 
+  FittestNetwork:
+    layers: 0e0000000c0000000800000005000000
     fitness: 0
+  TrainingData:
+    Data: []

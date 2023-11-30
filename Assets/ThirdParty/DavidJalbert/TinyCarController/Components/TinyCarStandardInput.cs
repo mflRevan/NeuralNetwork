@@ -1,13 +1,18 @@
-﻿using Default;
+﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Default;
+using TMPro;
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
 namespace DavidJalbert
 {
     public class TinyCarStandardInput : MonoBehaviour
     {
-        public TinyCarController carController;
-        public AICarController aiController;
-        public NeuralNetworkData data;
+        [SerializeField] private TinyCarController carController;
+        [SerializeField] private AICarController aiController;
+        [SerializeField] private NeuralNetworkData data;
+        [SerializeField] private GameObject collectingDataIndicator;
 
         public enum InputType
         {
@@ -49,15 +54,18 @@ namespace DavidJalbert
 
         private float boostTimer = 0;
 
+        // AI Training
+        private List<Dataset> trainingDataBuffer;
+        private bool collectingTrainingData;
+        private float collectCooldown;
+        private const float COLLECT_INTERVAL = 0.5f;
+
 
         void Start()
         {
             InputEnabled = inputEnabledFromStart;
 
-            if (InputEnabled)
-            {
-                aiController.EnableDrivingAI(false);
-            }
+            trainingDataBuffer = new();
         }
 
         void Update()
@@ -84,11 +92,52 @@ namespace DavidJalbert
             carController.setMotor(motorDelta);
             carController.setSteering(steeringDelta);
             carController.setBoostMultiplier(getInput(boostInput) == 1 ? boostMultiplier : 1);
+
+            // collect training data 
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // toggle collecting
+                collectingTrainingData = !collectingTrainingData;
+                collectingDataIndicator.SetActive(collectingTrainingData);
+            }
+
+            if (collectingTrainingData)
+            {
+                if (collectCooldown > 0f)
+                {
+                    collectCooldown -= Time.deltaTime;
+                }
+                else
+                {
+                    var dataset = CreateDatasetFromCurrentFrame();
+
+                    // print($"Added to TrainingData:\n\nInput:\n{input}\nOutput:\n{output}");
+                    data.TrainingData.AddData(dataset);
+                    trainingDataBuffer.Add(dataset);
+
+                    collectCooldown = COLLECT_INTERVAL;
+                }
+            }
+        }
+
+        // debug code
+        private async UniTask TrainAndTest()
+        {
+            if (aiController == null) { return; }
+
+            print("Starting Training...");
+            await aiController.AI.Train(trainingDataBuffer);
+            print("Training completed...");
+
+            InputEnabled = false;
+            aiController.EnableDrivingAI(true);
         }
 
         // create training sequence using unitask and dotween and NeuralNetwork.Train()
-        private (float[], float[]) CollectTrainingDataFromCurrentFrame()
+        private Dataset CreateDatasetFromCurrentFrame()
         {
+            if (aiController == null) { return null; }
+
             // desired output (corresponds to the human input )
             var desiredOutput = new float[5];
 
@@ -101,7 +150,7 @@ namespace DavidJalbert
             // training input (processed environment data)
             var trainingInput = aiController.ProcessAndUpdateEnvironmentData();
 
-            return (trainingInput, desiredOutput);
+            return new Dataset(trainingInput, desiredOutput);
         }
 
         public float getInput(InputValue v)

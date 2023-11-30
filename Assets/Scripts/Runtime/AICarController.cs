@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DavidJalbert;
 using UnityEngine;
 
@@ -9,8 +10,6 @@ namespace Default
         [SerializeField] public SensorFeed Feed;
         [SerializeField] public TinyCarController tinyCarController;
         [SerializeField] public TargetDirectionAgent targetDirectionAgent;
-        [SerializeField] public NeuralNetworkData data;
-        [SerializeField] public Transform target;
 
         [Header("Config")]
         [SerializeField] public float boostMultiplier = 2f;
@@ -20,50 +19,120 @@ namespace Default
 
         private float[] NNInputBuffer;
 
-        private float forwardInput;
-        private float backwardInput;
-        private float rightInput;
-        private float leftInput;
+        private float motorInput;
+        private float steeringInput;
         private float boostConfidenceInput;
 
-        public const int INPUT_NEURONS = 14;
-        public const int OUTPUT_NEURONS = 5;
-        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.7f;
+        private float initialDistance = 0f;
+        private float furthestDistancePassed;
+        private float stuckTimer;
+
+        public const int INPUT_NEURONS = 9;
+        public const int OUTPUT_NEURONS = 3;
+        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.75f;
+        public const float STUCK_MAX_TIMER = 12f;
         public const float TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE = 100f; // the max angle (right and left) from the targetDirection to be processed by the AI for decision making
 
 
         private void Awake()
         {
-            TickSystem.OnTick += InputInference;
-
             NNInputBuffer = new float[INPUT_NEURONS];
-        }
 
-        private void Start()
-        {
-            // debug
-            targetDirectionAgent.SetTarget(target.position);
-
-            AI = new NeuralNetwork(data.FittestNetwork);
-
-
-            // EnableDrivingAI(true);
+            tinyCarController.HasHitSomething += OnSomethingHit;
         }
 
         private void OnDestroy()
         {
-            TickSystem.OnTick -= InputInference;
+            tinyCarController.HasHitSomething -= OnSomethingHit;
+        }
+
+        private void Update()
+        {
+            if (!AIDrivingEnabled || AI == null || !targetDirectionAgent.HasTarget()) { return; }
+
+            InputInference();
+
+            // reset position to spawn upon hitting a wall and disable AI input
+            if (stuckTimer >= STUCK_MAX_TIMER)
+            {
+                Reset();
+            }
+
+            var currentDistancePassed = initialDistance - targetDirectionAgent.GetCurrentDistanceToTarget();
+
+            if (currentDistancePassed < furthestDistancePassed + 5f)
+            {
+                stuckTimer += Time.deltaTime;
+            }
+            else
+            {
+                furthestDistancePassed = currentDistancePassed;
+                stuckTimer = 0;
+            }
+        }
+
+        private void OnSomethingHit()
+        {
+            Reset();
+        }
+
+        private void Reset()
+        {
+            // SetPositionAndRotation(GameManager.Instance.spawn.position, GameManager.Instance.spawn.rotation);
+            targetDirectionAgent.Reset();
+            EnableDrivingAI(false);
+        }
+
+        public async UniTask SetTarget(Vector3 pos)
+        {
+            stuckTimer = 0f;
+            furthestDistancePassed = 0f;
+            targetDirectionAgent.SetTarget(pos);
+
+            await targetDirectionAgent.WaitUntilHasPath();
+
+            initialDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
+        }
+
+        /// <returns>The completion percentage of the current path</returns>
+        public float GetCompletionPercentage()
+        {
+            var currentDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
+            // print(1f - Mathf.Clamp01(currentDistance / initialDistance));
+            return 1f - Mathf.Clamp01(currentDistance / initialDistance);
+        }
+
+        public void SetPositionAndRotation(Vector3 pos, Quaternion rot)
+        {
+            targetDirectionAgent.Agent.enabled = false;
+            transform.SetPositionAndRotation(pos, rot);
+            targetDirectionAgent.Agent.enabled = true;
+        }
+
+        public void SetAI(NeuralNetwork copyNetwork)
+        {
+            if (copyNetwork == null)
+            {
+                AI = null;
+                return;
+            };
+
+            // deepcopy
+            AI = new NeuralNetwork(copyNetwork);
         }
 
         public void EnableDrivingAI(bool enable)
         {
             AIDrivingEnabled = enable;
+            tinyCarController.setMotor(0f);
+            tinyCarController.setSteering(0f);
+            tinyCarController.setBoostMultiplier(1f);
+            tinyCarController.clearVelocity();
         }
 
         public float[] ProcessAndUpdateEnvironmentData()
         {
             var sensorData = Feed.GetSensorData();
-
 
             // add sensordata to input neurons
             for (int i = 0; i < sensorData.Length; i++)
@@ -71,56 +140,49 @@ namespace Default
                 NNInputBuffer[i] = sensorData[i];
             }
 
+            // // add normalized car speed
+            // var direction = tinyCarController.getVelocityDirection();
+            // var maxSpeed = tinyCarController.getMaxSpeed();
+            // var currentSpeed = Mathf.Abs(tinyCarController.getForwardVelocity());
 
-            // add normalized car speed
-            var direction = tinyCarController.getVelocityDirection();
-            var maxSpeed = tinyCarController.getMaxSpeed();
-            var currentSpeed = Mathf.Abs(tinyCarController.getForwardVelocity());
+            // var normalizedForwardSpeed = 0f;
+            // var normalizedBackwardSpeed = 0f;
 
-            var normalizedForwardSpeed = 0f;
-            var normalizedBackwardSpeed = 0f;
+            // if (direction > 0) // driving forward
+            // {
+            //     normalizedForwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
+            // }
+            // else // driving backward
+            // {
+            //     normalizedBackwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
+            // }
 
-            if (direction > 0) // driving forward
-            {
-                normalizedForwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
-            }
-            else // driving backward
-            {
-                normalizedBackwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
-            }
-
-            NNInputBuffer[sensorData.Length] = normalizedForwardSpeed;
-            NNInputBuffer[sensorData.Length + 1] = normalizedBackwardSpeed;
-
+            // NNInputBuffer[sensorData.Length] = normalizedForwardSpeed;
+            // NNInputBuffer[sensorData.Length + 1] = normalizedBackwardSpeed;
 
             // add direction indicators for right and left
             (float rightIndicator, float leftIndicator) = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
 
-            NNInputBuffer[sensorData.Length + 2] = rightIndicator;
-            NNInputBuffer[sensorData.Length + 3] = leftIndicator;
+            NNInputBuffer[sensorData.Length] = rightIndicator;
+            NNInputBuffer[sensorData.Length + 1] = leftIndicator;
 
             return NNInputBuffer;
         }
 
         private void InputInference()
         {
-            if (!AIDrivingEnabled || AI == null) { return; }
-
             ProcessAndUpdateEnvironmentData();
-
 
             var input = AI.FeedForward(NNInputBuffer);
 
-            forwardInput = input[0];
-            backwardInput = input[1];
-            rightInput = input[2];
-            leftInput = input[3];
-            boostConfidenceInput = input[4];
+            motorInput = (input[0] * 2f) - 1f;
+            steeringInput = (input[1] * 2f) - 1f;
+            boostConfidenceInput = input[2];
 
 
-            tinyCarController.setMotor(forwardInput - backwardInput);
+            tinyCarController.setMotor(motorInput);
             // print($"Forward: {forwardInput}, Backward {backwardInput}");
-            tinyCarController.setSteering(rightInput - leftInput);
+            tinyCarController.setSteering(steeringInput);
             // print($"Right: {rightInput}, Left {leftInput}");
             tinyCarController.setBoostMultiplier(boostConfidenceInput > BOOST_CONFIDENCE_THRESHHOLD ? boostMultiplier : 1f);
             // print($"Boost Confidence: {boostConfidenceInput}");

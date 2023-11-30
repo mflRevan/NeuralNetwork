@@ -7,7 +7,7 @@ namespace Default
     {
         public const float RANGE_FORWARD = 60f;
         public const float RANGE_SIDE = 20f;
-        public const float RANGE_BACKWARD = 40f;
+        public const float RANGE_BACKWARD = 20f;
 
         [SerializeField] private List<Sensor> sensors;
         public List<Sensor> Sensors => sensors;

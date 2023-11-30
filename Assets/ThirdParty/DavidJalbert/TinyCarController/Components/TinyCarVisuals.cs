@@ -38,6 +38,7 @@ namespace DavidJalbert
 
         [Header("Particles")]
 
+        public bool complexVisuals = true;
         [Tooltip("Minimum velocity when scraping against a wall to play the particle system.")]
         public float minSideFrictionVelocity = 1;
         [Tooltip("Particle system to play when scraping against a wall.")]
@@ -119,17 +120,21 @@ namespace DavidJalbert
                 vehicleContainer.position = carController.getBodyPosition();
             }
 
-            wheelSpin += carController.getForwardVelocity() * deltaTime * wheelsSpinForce * (adjustToScale ? averageScale : 1);
-            wheelRotation = Mathf.Lerp(wheelRotation, carController.getSteering() * wheelsMaxTurnAngle, wheelsTurnSmoothing <= 0 ? 1 : Mathf.Clamp01(wheelsTurnSmoothing * deltaTime));
+            if (complexVisuals)
+            {
+                wheelSpin += carController.getForwardVelocity() * deltaTime * wheelsSpinForce * (adjustToScale ? averageScale : 1);
+                wheelRotation = Mathf.Lerp(wheelRotation, carController.getSteering() * wheelsMaxTurnAngle, wheelsTurnSmoothing <= 0 ? 1 : Mathf.Clamp01(wheelsTurnSmoothing * deltaTime));
 
-            foreach (Transform t in wheelsFront)
-            {
-                t.transform.localRotation = Quaternion.Euler(wheelSpin, wheelRotation, 0);
+                foreach (Transform t in wheelsFront)
+                {
+                    t.transform.localRotation = Quaternion.Euler(wheelSpin, wheelRotation, 0);
+                }
+                foreach (Transform t in wheelsBack)
+                {
+                    t.transform.localRotation = Quaternion.Euler(wheelSpin, 0, 0);
+                }
             }
-            foreach (Transform t in wheelsBack)
-            {
-                t.transform.localRotation = Quaternion.Euler(wheelSpin, 0, 0);
-            }
+
 
             // particles
 
@@ -139,7 +144,7 @@ namespace DavidJalbert
             {
                 if (Mathf.Abs(carController.getLateralVelocity()) > minDriftingSpeed * (adjustToScale ? averageScale : 1) && carController.isGrounded())
                 {
-                    if (!particlesDrifting.isPlaying)
+                    if (!particlesDrifting.isPlaying && complexVisuals)
                     {
                         particlesDrifting.Play();
                     }
@@ -160,13 +165,13 @@ namespace DavidJalbert
                 if (carController.hasHitSide(minSideCollisionForce * (adjustToScale ? averageScale : 1)))
                 {
                     particlesSideCollision.transform.position = carController.getSideHitPosition();
-                    particlesSideCollision.Play();
+                    if (complexVisuals) { particlesSideCollision.Play(); }
                 }
             }
 
             if (particlesLanding != null)
             {
-                if (carController.hasHitGround(minLandingForce * (adjustToScale ? averageScale : 1)))
+                if (carController.hasHitGround(minLandingForce * (adjustToScale ? averageScale : 1)) && complexVisuals)
                 {
                     particlesLanding.Play();
                 }
@@ -177,7 +182,7 @@ namespace DavidJalbert
                 if (carController.isHittingSide() && carController.getGroundVelocity() > minSideFrictionVelocity * (adjustToScale ? averageScale : 1))
                 {
                     particlesSideFriction.transform.position = carController.getSideHitPosition();
-                    if (!particlesSideFriction.isPlaying) particlesSideFriction.Play();
+                    if (!particlesSideFriction.isPlaying && complexVisuals) particlesSideFriction.Play();
                 }
                 else
                 {
@@ -187,7 +192,7 @@ namespace DavidJalbert
 
             if (particlesBoost != null)
             {
-                if (carController.getBoostMultiplier() > 1f)
+                if (carController.getBoostMultiplier() > 1f && complexVisuals)
                 {
                     particlesBoost.Play();
                 }

@@ -42,5 +42,11 @@ public class NeuralNetworkDataEditor : Editor
         {
             neuralNetworkData.CreateNeuralNetwork(layerSizes.ToArray());
         }
+
+        // Clear data button
+        if (GUILayout.Button("Clear Training Data"))
+        {
+            neuralNetworkData.ClearTrainingData();
+        }
     }
 }
