@@ -34,9 +34,10 @@ namespace DavidJalbert
         [Tooltip("Smoothing of the camera's rotation. The lower the value, the smoother the rotation. Set to 0 to disable smoothing.")]
         public float thirdPersonInterpolation = 10;
 
+
         private void Start()
         {
-            
+
         }
 
         void FixedUpdate()

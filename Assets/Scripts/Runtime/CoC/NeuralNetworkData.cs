@@ -1,34 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Default
 {
-    [CreateAssetMenu(fileName = "NeuralNetworkData", menuName = "Neural Network/Data")]
+    [CreateAssetMenu(fileName = "NeuralNetworkData", menuName = "Neural Network/Data"), Serializable]
     public class NeuralNetworkData : ScriptableObject
     {
-        public NeuralNetwork FittestNetwork;
-        public TrainingData TrainingData;
+        [TextArea] public string fittestNetworkData_Evolution;
+        [TextArea] public string fittestNetworkData_Training;
+
+        [Space]
+        public List<Dataset> TrainingData;
 
 
-        public void StoreNetwork(NeuralNetwork network)
+        public void StoreNetwork(NeuralNetwork network, bool evolutionNetwork)
         {
-            FittestNetwork = new NeuralNetwork(network);
+            if (evolutionNetwork)
+            {
+                fittestNetworkData_Evolution = network.GetJsonData();
+            }
+            else
+            {
+                fittestNetworkData_Training = network.GetJsonData();
+            }
 
-            Debug.Log($"Stored Network with:\nFitness: {FittestNetwork.GetFitness()}\nWeights length: {FittestNetwork.weights.Length} + {FittestNetwork.weights[0].Length}\nNeurons: {FittestNetwork.neurons}\nBiases: {FittestNetwork.biases}");
-        }
-
-        public void CreateNeuralNetwork(int[] layers)
-        {
-            FittestNetwork = new NeuralNetwork(layers);
-        }
-
-        public void ClearTrainingData()
-        {
-            TrainingData = new();
+            Debug.Log($"Saved data:\n{fittestNetworkData_Evolution}\nas " + (evolutionNetwork ? "evolution" : "training"));
         }
     }
+
+
 
     [Serializable]
     public class TrainingData

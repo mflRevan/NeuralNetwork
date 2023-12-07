@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
+using TMPro;
 using UnityEngine;
 
 
@@ -7,9 +9,12 @@ namespace Default
 {
     public class AICarController : MonoBehaviour
     {
+        [SerializeField] public bool isPlayerController;
         [SerializeField] public SensorFeed Feed;
         [SerializeField] public TinyCarController tinyCarController;
         [SerializeField] public TargetDirectionAgent targetDirectionAgent;
+        [SerializeField] public WallHitDetector wallHitDetector;
+        [SerializeField] public TMP_Text uiHeader;
 
         [Header("Config")]
         [SerializeField] public float boostMultiplier = 2f;
@@ -27,9 +32,14 @@ namespace Default
         private float furthestDistancePassed;
         private float stuckTimer;
 
-        public const int INPUT_NEURONS = 9;
+        // temp vars in order to execute in main thread when SetPositionAndRotation() is called
+        private bool setPosAndRot;
+        private Vector3 positionToSet;
+        private Quaternion rotationToSet;
+
+        public const int INPUT_NEURONS = 5;
         public const int OUTPUT_NEURONS = 3;
-        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.75f;
+        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.8f;
         public const float STUCK_MAX_TIMER = 12f;
         public const float TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE = 100f; // the max angle (right and left) from the targetDirection to be processed by the AI for decision making
 
@@ -38,21 +48,35 @@ namespace Default
         {
             NNInputBuffer = new float[INPUT_NEURONS];
 
-            tinyCarController.HasHitSomething += OnSomethingHit;
+            wallHitDetector.WallHit += OnWallHit;
         }
 
         private void OnDestroy()
         {
-            tinyCarController.HasHitSomething -= OnSomethingHit;
+            wallHitDetector.WallHit -= OnWallHit;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
+            if (isPlayerController)
+            {
+                var dir = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
+                print($"Turn {dir}");
+            }
+
+            if (setPosAndRot)
+            {
+                setPosAndRot = false;
+                transform.SetPositionAndRotation(positionToSet, rotationToSet);
+
+                targetDirectionAgent.enabled = true;
+            }
+
             if (!AIDrivingEnabled || AI == null || !targetDirectionAgent.HasTarget()) { return; }
 
             InputInference();
 
-            // reset position to spawn upon hitting a wall and disable AI input
+            // if car is "stuck" somewhere, reset
             if (stuckTimer >= STUCK_MAX_TIMER)
             {
                 Reset();
@@ -60,9 +84,9 @@ namespace Default
 
             var currentDistancePassed = initialDistance - targetDirectionAgent.GetCurrentDistanceToTarget();
 
-            if (currentDistancePassed < furthestDistancePassed + 5f)
+            if (currentDistancePassed < furthestDistancePassed + 6f)
             {
-                stuckTimer += Time.deltaTime;
+                stuckTimer += Time.fixedDeltaTime;
             }
             else
             {
@@ -71,9 +95,10 @@ namespace Default
             }
         }
 
-        private void OnSomethingHit()
+        private void OnWallHit()
         {
             Reset();
+            Debug.Log("Hit something!");
         }
 
         private void Reset()
@@ -87,10 +112,9 @@ namespace Default
         {
             stuckTimer = 0f;
             furthestDistancePassed = 0f;
+
             targetDirectionAgent.SetTarget(pos);
-
             await targetDirectionAgent.WaitUntilHasPath();
-
             initialDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
         }
 
@@ -104,9 +128,33 @@ namespace Default
 
         public void SetPositionAndRotation(Vector3 pos, Quaternion rot)
         {
-            targetDirectionAgent.Agent.enabled = false;
-            transform.SetPositionAndRotation(pos, rot);
-            targetDirectionAgent.Agent.enabled = true;
+            targetDirectionAgent.enabled = false;
+            positionToSet = pos;
+            rotationToSet = rot;
+            setPosAndRot = true;
+        }
+
+        public void SetUIHeader(string text)
+        {
+            if (uiHeader != null) uiHeader.text = text;
+        }
+
+        public void SetAI(string data)
+        {
+            // init network from data
+            AI = new NeuralNetwork(data);
+        }
+
+        public void SetAI(int[] hiddenLayerStructure)
+        {
+            var structure = new List<int>();
+
+            structure.Add(INPUT_NEURONS);
+            structure.AddRange(hiddenLayerStructure);
+            structure.Add(OUTPUT_NEURONS);
+
+            // init random network with set architecture
+            AI = new NeuralNetwork(structure.ToArray());
         }
 
         public void SetAI(NeuralNetwork copyNetwork)
@@ -128,6 +176,9 @@ namespace Default
             tinyCarController.setSteering(0f);
             tinyCarController.setBoostMultiplier(1f);
             tinyCarController.clearVelocity();
+
+            if (uiHeader != null)
+                uiHeader.color = enable ? Color.green : Color.red;
         }
 
         public float[] ProcessAndUpdateEnvironmentData()
@@ -175,10 +226,9 @@ namespace Default
 
             var input = AI.FeedForward(NNInputBuffer);
 
-            motorInput = (input[0] * 2f) - 1f;
+            motorInput = input[0];
             steeringInput = (input[1] * 2f) - 1f;
             boostConfidenceInput = input[2];
-
 
             tinyCarController.setMotor(motorInput);
             // print($"Forward: {forwardInput}, Backward {backwardInput}");

@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Default
 {
@@ -10,17 +11,17 @@ namespace Default
     [Serializable]
     public class NeuralNetwork : IComparable<NeuralNetwork>
     {
-        private float learningRate = 1f;
-        private float weightDecay = 0.001f;
+        private const float DEFAULT_LEARNING_RATE = 0.4f;
+        private const float DEFAULT_WEIGHT_DECAY = 0.001f;
 
         public int[] layers; //layers
         public float[][] neurons; //neuron matix
         public float[][] biases; //biases per neuron
         public float[][][] weights; //weight matrix
 
-        private float[][] desiredNeurons;
-        private float[][] biasesSmudge;
-        private float[][][] weightsSmudge;
+        public float[][] desiredNeurons;
+        public float[][] biasesSmudge;
+        public float[][][] weightsSmudge;
 
         [SerializeField] private float fitness = 0f; //fitness of the network
 
@@ -39,6 +40,31 @@ namespace Default
             InitBiases(randomBiases);
 
             fitness = 0f;
+        }
+
+        /// <summary>
+        /// Create Network from Json-Data
+        /// </summary>
+        public NeuralNetwork(string jsonData)
+        {
+            var data = JsonConvert.DeserializeObject<SerializedNetworkData>(jsonData);
+
+            this.layers = new int[data.layers.Length];
+            Debug.Log(jsonData + "\n\n\n\n" + data);
+
+            for (int i = 0; i < data.layers.Length; i++)
+            {
+                this.layers[i] = data.layers[i];
+            }
+
+            InitNeurons();
+            InitWeights();
+            InitBiases(false);
+
+            CopyBiases(data.biases);
+            CopyWeights(data.weights);
+
+            fitness = data.fitness == float.NaN ? 0f : data.fitness;
         }
 
         /// <summary>
@@ -128,16 +154,17 @@ namespace Default
         {
             //Neuron Initilization
             List<float[]> neuronsList = new();
+            List<float[]> desiredNeuronsList = new();
 
             for (int i = 0; i < layers.Length; i++) //run through all layers
             {
                 neuronsList.Add(new float[layers[i]]); //add layer to neuron list
+                desiredNeuronsList.Add(new float[layers[i]]); //add layer to neuron list
             }
 
-            var array = neuronsList.ToArray();
-
-            neurons = array; //convert list to array
-            desiredNeurons = array;
+            //convert list to array
+            neurons = neuronsList.ToArray();
+            desiredNeurons = desiredNeuronsList.ToArray();
         }
 
         /// <summary>
@@ -212,16 +239,15 @@ namespace Default
         /// <summary>
         /// Train the underlying network using backpropagation 
         /// </summary>
-        public async UniTask Train(List<Dataset> trainingData)
+        public async UniTask Train(List<Dataset> trainingData, float learningRate = DEFAULT_LEARNING_RATE, float weightDecay = DEFAULT_WEIGHT_DECAY)
         {
             for (var i = 0; i < trainingData.Count; i++)
             {
                 var dataset = trainingData[i];
+                var actualOutput = FeedForward(dataset.Inputs);
 
-                if (FeedForward(dataset.Inputs) == null) // feed forward data, but if invalid training data, discontinue training
-                {
-                    return;
-                }
+                // if invalid training data, discontinue training
+                if (actualOutput == null) { return; }
 
                 // set desired output from trainingdata to backpropagate
                 for (var j = 0; j < desiredNeurons[desiredNeurons.Length - 1].Length; j++)
@@ -234,8 +260,8 @@ namespace Default
                 {
                     for (var k = 0; k < neurons[j].Length; k++)
                     {
-                        var biasSmudge = SigmoidDerivative(neurons[j][k]) *
-                                        (desiredNeurons[j][k] - neurons[j][k]);
+                        var biasSmudge = SigmoidDerivative(neurons[j][k]) // activation function
+                                        * (desiredNeurons[j][k] - neurons[j][k]); // cost function for single neuron
                         biasesSmudge[j][k] += biasSmudge;
 
                         for (var l = 0; l < neurons[j - 1].Length; l++)
@@ -255,17 +281,16 @@ namespace Default
                 for (var j = 0; j < neurons[i].Length; j++)
                 {
                     biases[i][j] += biasesSmudge[i][j] * learningRate;
-                    biases[i][j] *= 1 - weightDecay;
-                    biasesSmudge[i][j] = 0; // reset smudges
+                    biasesSmudge[i][j] = 0f; // reset smudges
 
                     for (var k = 0; k < neurons[i - 1].Length; k++)
                     {
                         weights[i - 1][j][k] += weightsSmudge[i - 1][j][k] * learningRate;
                         weights[i - 1][j][k] *= 1 - weightDecay;
-                        weightsSmudge[i - 1][j][k] = 0; // reset smudges
+                        weightsSmudge[i - 1][j][k] = 0f; // reset smudges
                     }
 
-                    desiredNeurons[i][j] = 0;
+                    desiredNeurons[i][j] = 0f;
                 }
             }
 
@@ -285,19 +310,30 @@ namespace Default
                 return null;
             }
 
-            //Add inputs to the neuron matrix
+            var outputs = new float[neurons[layers.Length - 1].Length]; // output layer format 
+
+            // Set inputs of the neuron matrix
             for (var i = 0; i < neurons[0].Length; i++) neurons[0][i] = inputs[i];
 
+            // Iterate over the rest neurons, including the output
             for (var i = 1; i < neurons.Length; i++)
             {
                 for (var j = 0; j < neurons[i].Length; j++)
                 {
-                    neurons[i][j] = Sigmoid(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
+                    var activationValue = Sigmoid(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
+
+                    neurons[i][j] = activationValue;
                     desiredNeurons[i][j] = neurons[i][j];
+
+                    // if at last layer/set of neurons
+                    if (i >= layers.Length - 1)
+                    {
+                        outputs[j] = activationValue;
+                    }
                 }
             }
 
-            return neurons[neurons.Length - 1]; //return output layer
+            return outputs; //return copy of activated output layer
         }
 
         private static float Sum(IEnumerable<float> values, IReadOnlyList<float> weights) =>
@@ -324,7 +360,7 @@ namespace Default
         }
 
         /// <summary>
-        /// Mutate neural network weights and biases
+        /// Mutate weights and biases
         /// </summary>
         public void Mutate()
         {
@@ -401,6 +437,14 @@ namespace Default
         public float GetFitness()
         {
             return fitness;
+        }
+
+        public string GetJsonData()
+        {
+            var data = new SerializedNetworkData(this);
+            var jsonData = JsonConvert.SerializeObject(data);
+
+            return jsonData;
         }
 
         /// <summary>

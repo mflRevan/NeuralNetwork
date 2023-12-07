@@ -232,6 +232,17 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""4e670e7b-2876-49ab-b01d-05b8a2229e1b"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DriveInput"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""883465a2-739e-4ba3-9c2c-ff1739069b63"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",

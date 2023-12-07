@@ -12,14 +12,17 @@ namespace Default
         public NavMeshAgent Agent => agent;
         public Vector3 TargetDirection { get; private set; }
 
+        private float lastDistance;
+
         private void Start()
         {
-            agent.isStopped = true;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+            agent.updatePosition = false;
         }
 
         public void SetTarget(Vector3 pos)
         {
+            agent.isStopped = false;
             agent.SetDestination(pos);
         }
 
@@ -30,7 +33,10 @@ namespace Default
 
         public float GetCurrentDistanceToTarget()
         {
-            if (!agent.hasPath) return 0f;
+            if (!agent.hasPath)
+            {
+                return 0f;
+            }
 
             var corners = agent.path.corners;
             var fullDistance = 0f;
@@ -54,13 +60,16 @@ namespace Default
         public void Reset()
         {
             // agent.ResetPath();
-            TargetDirection = Vector3.zero;
+            agent.isStopped = true;
         }
 
         private void FixedUpdate()
         {
             if (agent.hasPath)
+            {
+                agent.nextPosition = transform.position;
                 TargetDirection = agent.steeringTarget - transform.position;
+            }
         }
 
         private void OnDrawGizmos()

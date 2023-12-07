@@ -68,8 +68,6 @@ namespace DavidJalbert
         [Tooltip("How much grip the car should have on the road when turning.")]
         public float lateralFriction = 80;
 
-        public Action HasHitSomething;
-
         private Rigidbody body;
         private SphereCollider sphereCollider;
         private bool onGround = false;
@@ -593,8 +591,6 @@ namespace DavidJalbert
                 bool isStaticCollider = collision.rigidbody == null || collision.rigidbody.isKinematic;
                 if (isStaticCollider) hitSideStayStatic = true;
                 else hitSideStayDynamic = true;
-
-                HasHitSomething?.Invoke();
 
                 if (hitSideForce < collisionXZForce)
                 {

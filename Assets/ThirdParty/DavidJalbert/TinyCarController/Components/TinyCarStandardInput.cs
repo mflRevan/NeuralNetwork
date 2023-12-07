@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Default;
 using TMPro;
 using Unity.Android.Gradle.Manifest;
+using Unity.Barracuda;
 using UnityEngine;
 
 namespace DavidJalbert
@@ -13,6 +14,7 @@ namespace DavidJalbert
         [SerializeField] private AICarController aiController;
         [SerializeField] private NeuralNetworkData data;
         [SerializeField] private GameObject collectingDataIndicator;
+        [SerializeField] private TMP_Text trainingStatusText;
 
         public enum InputType
         {
@@ -93,10 +95,29 @@ namespace DavidJalbert
             carController.setSteering(steeringDelta);
             carController.setBoostMultiplier(getInput(boostInput) == 1 ? boostMultiplier : 1);
 
+            if (Input.GetKeyDown(KeyCode.R)) // reset to spawn
+            {
+                carController.clearVelocity();
+                carController.setMotor(0f);
+                carController.setSteering(0f);
+                carController.setBoostMultiplier(1f);
+                aiController.SetPositionAndRotation(GameManager.Instance.spawn.position, GameManager.Instance.spawn.rotation);
+            }
+
             // collect training data 
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 // toggle collecting
+
+                if (collectingTrainingData) //if toggle off => take training data buffer and train agents
+                {
+                    GameManager.Instance.TrainAgents(GameManager.Instance.TrainWithLocalBuffer ? trainingDataBuffer : data.TrainingData).Forget();
+                }
+                else
+                {
+                    aiController?.SetTarget(GameManager.Instance.target.position);
+                }
+
                 collectingTrainingData = !collectingTrainingData;
                 collectingDataIndicator.SetActive(collectingTrainingData);
             }
@@ -111,26 +132,18 @@ namespace DavidJalbert
                 {
                     var dataset = CreateDatasetFromCurrentFrame();
 
-                    // print($"Added to TrainingData:\n\nInput:\n{input}\nOutput:\n{output}");
-                    data.TrainingData.AddData(dataset);
                     trainingDataBuffer.Add(dataset);
+
+                    if (GameManager.Instance.SaveLocalBufferToData)
+                    {
+                        data.TrainingData.Add(dataset);
+                    }
+
+                    trainingStatusText.text = $"Collected Datasets: {trainingDataBuffer.Count}";
 
                     collectCooldown = COLLECT_INTERVAL;
                 }
             }
-        }
-
-        // debug code
-        private async UniTask TrainAndTest()
-        {
-            if (aiController == null) { return; }
-
-            print("Starting Training...");
-            await aiController.AI.Train(trainingDataBuffer);
-            print("Training completed...");
-
-            InputEnabled = false;
-            aiController.EnableDrivingAI(true);
         }
 
         // create training sequence using unitask and dotween and NeuralNetwork.Train()
@@ -139,13 +152,11 @@ namespace DavidJalbert
             if (aiController == null) { return null; }
 
             // desired output (corresponds to the human input )
-            var desiredOutput = new float[5];
+            var desiredOutput = new float[3];
 
             desiredOutput[0] = getInput(forwardInput);
-            desiredOutput[1] = getInput(reverseInput);
-            desiredOutput[2] = getInput(steerRightInput);
-            desiredOutput[3] = getInput(steerLeftInput);
-            desiredOutput[4] = getInput(boostInput);
+            desiredOutput[1] = getInput(steerRightInput) - getInput(steerLeftInput);
+            desiredOutput[2] = getInput(boostInput);
 
             // training input (processed environment data)
             var trainingInput = aiController.ProcessAndUpdateEnvironmentData();

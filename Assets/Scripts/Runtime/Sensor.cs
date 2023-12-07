@@ -23,21 +23,23 @@ namespace Default
         {
             LayerMask mask = GameManager.Instance != null ? GameManager.Instance.WallMask : 0;
             var range = 0f;
+            var hit = new RaycastHit();
 
             switch (Direction)
             {
                 case SensorDirection.FORWARD:
                     range = SensorFeed.RANGE_FORWARD;
+                    Physics.SphereCast(transform.position, SensorFeed.AGENT_RADIUS, transform.forward, out hit, range, mask, QueryTriggerInteraction.Collide);
                     break;
                 case SensorDirection.SIDE:
                     range = SensorFeed.RANGE_SIDE;
+                    Physics.Raycast(transform.position, transform.forward, out hit, range, mask, QueryTriggerInteraction.Collide);
                     break;
                 case SensorDirection.BACKWARD:
                     range = SensorFeed.RANGE_BACKWARD;
                     break;
             }
 
-            Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, range, mask, QueryTriggerInteraction.Collide);
             var rangePercentage = hit.collider != null ? Vector3.Distance(transform.position, hit.point) / range : 1f;
 
             return rangePercentage;
@@ -45,25 +47,25 @@ namespace Default
 
         private void OnDrawGizmos()
         {
-            float range = GetFeed();
+            var rangePercentage = GetFeed();
 
             switch (Direction)
             {
                 case SensorDirection.FORWARD:
-                    range *= SensorFeed.RANGE_FORWARD;
+                    rangePercentage *= SensorFeed.RANGE_FORWARD;
                     Gizmos.color = Color.green;
                     break;
                 case SensorDirection.SIDE:
-                    range *= SensorFeed.RANGE_SIDE;
+                    rangePercentage *= SensorFeed.RANGE_SIDE;
                     Gizmos.color = Color.yellow;
                     break;
                 case SensorDirection.BACKWARD:
-                    range *= SensorFeed.RANGE_BACKWARD;
+                    rangePercentage *= SensorFeed.RANGE_BACKWARD;
                     Gizmos.color = Color.red;
                     break;
             }
 
-            Gizmos.DrawLine(transform.position, transform.position + (transform.forward * range));
+            Gizmos.DrawLine(transform.position, transform.position + (transform.forward * rangePercentage));
         }
     }
 }
