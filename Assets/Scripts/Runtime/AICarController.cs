@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
@@ -21,6 +22,7 @@ namespace Default
 
         public NeuralNetwork AI { get; private set; }
         public bool AIDrivingEnabled { get; private set; }
+        public float InitialDistance => initialDistance;
 
         private float[] NNInputBuffer;
 
@@ -28,18 +30,16 @@ namespace Default
         private float steeringInput;
         private float boostConfidenceInput;
 
+        private bool hasCrashedLastRun;
         private float initialDistance = 0f;
+        private float lastFinishTime;
         private float furthestDistancePassed;
         private float stuckTimer;
+        private float driveTimer;
 
-        // temp vars in order to execute in main thread when SetPositionAndRotation() is called
-        private bool setPosAndRot;
-        private Vector3 positionToSet;
-        private Quaternion rotationToSet;
-
-        public const int INPUT_NEURONS = 5;
+        public const int INPUT_NEURONS = 7;
         public const int OUTPUT_NEURONS = 3;
-        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.8f;
+        public const float BOOST_CONFIDENCE_THRESHHOLD = 0.7f;
         public const float STUCK_MAX_TIMER = 12f;
         public const float TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE = 100f; // the max angle (right and left) from the targetDirection to be processed by the AI for decision making
 
@@ -58,23 +58,17 @@ namespace Default
 
         private void FixedUpdate()
         {
-            if (isPlayerController)
-            {
-                var dir = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
-                print($"Turn {dir}");
-            }
-
-            if (setPosAndRot)
-            {
-                setPosAndRot = false;
-                transform.SetPositionAndRotation(positionToSet, rotationToSet);
-
-                targetDirectionAgent.enabled = true;
-            }
+            // if (isPlayerController)
+            // {
+            //     var sensorData = Feed.GetSensorData();
+            //     print($"To the left: {sensorData[sensorData.Length - 1]}\nTo the right: {sensorData[sensorData.Length - 2]}");
+            // }
 
             if (!AIDrivingEnabled || AI == null || !targetDirectionAgent.HasTarget()) { return; }
 
             InputInference();
+
+            driveTimer += Time.fixedDeltaTime;
 
             // if car is "stuck" somewhere, reset
             if (stuckTimer >= STUCK_MAX_TIMER)
@@ -84,7 +78,7 @@ namespace Default
 
             var currentDistancePassed = initialDistance - targetDirectionAgent.GetCurrentDistanceToTarget();
 
-            if (currentDistancePassed < furthestDistancePassed + 6f)
+            if (currentDistancePassed < furthestDistancePassed + 10f)
             {
                 stuckTimer += Time.fixedDeltaTime;
             }
@@ -98,14 +92,24 @@ namespace Default
         private void OnWallHit()
         {
             Reset();
-            Debug.Log("Hit something!");
+            hasCrashedLastRun = true;
         }
 
         private void Reset()
         {
-            // SetPositionAndRotation(GameManager.Instance.spawn.position, GameManager.Instance.spawn.rotation);
             targetDirectionAgent.Reset();
             EnableDrivingAI(false);
+        }
+
+        public void OnFinish()
+        {
+            lastFinishTime = driveTimer;
+            Reset();
+        }
+
+        public void OnFail()
+        {
+            Reset();
         }
 
         public async UniTask SetTarget(Vector3 pos)
@@ -121,17 +125,37 @@ namespace Default
         /// <returns>The completion percentage of the current path</returns>
         public float GetCompletionPercentage()
         {
-            var currentDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
-            // print(1f - Mathf.Clamp01(currentDistance / initialDistance));
-            return 1f - Mathf.Clamp01(currentDistance / initialDistance);
+            if (lastFinishTime >= 0.5f) // if the car has reached the finish line => return 100%
+            {
+                return 1f;
+            }
+            else // return the actual distance
+            {
+                var currentDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
+
+                return 1f - Mathf.Clamp01(currentDistance / initialDistance);
+            }
         }
 
-        public void SetPositionAndRotation(Vector3 pos, Quaternion rot)
+        /// <summary>
+        /// If the car crashed, finish time will be 0 seconds
+        /// </summary>
+        public float GetLastFinishTime()
         {
-            targetDirectionAgent.enabled = false;
-            positionToSet = pos;
-            rotationToSet = rot;
-            setPosAndRot = true;
+            return lastFinishTime;
+        }
+
+        public bool HasCrashedLastRun()
+        {
+            return hasCrashedLastRun;
+        }
+
+        public async UniTask SetPositionAndRotation(Vector3 pos, Quaternion rot)
+        {
+            await UniTask.WaitForFixedUpdate(gameObject.GetCancellationTokenOnDestroy());
+
+            transform.SetPositionAndRotation(pos, rot);
+            targetDirectionAgent.Warp(pos);
         }
 
         public void SetUIHeader(string text)
@@ -171,6 +195,10 @@ namespace Default
 
         public void EnableDrivingAI(bool enable)
         {
+            driveTimer = 0f;
+            lastFinishTime = enable ? 0f : lastFinishTime; // reset the finishtime upon enabling the car
+            hasCrashedLastRun = enable ? false : hasCrashedLastRun; // reset the crash indicator upon enabling the car
+
             AIDrivingEnabled = enable;
             tinyCarController.setMotor(0f);
             tinyCarController.setSteering(0f);
@@ -226,7 +254,7 @@ namespace Default
 
             var input = AI.FeedForward(NNInputBuffer);
 
-            motorInput = input[0];
+            motorInput = (input[0] * 2f) - 1f;
             steeringInput = (input[1] * 2f) - 1f;
             boostConfidenceInput = input[2];
 
@@ -253,8 +281,8 @@ namespace Default
             float turnDirection = Vector3.Cross(carForward, directionIndicator).y;
 
             // Calculate the encoded outputs, inverted for better processing by the AI (due to sigmoid)
-            float rightIndicator = turnDirection > 0 ? 1 - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
-            float leftIndicator = turnDirection < 0 ? 1 - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
+            float rightIndicator = turnDirection > 0 ? 1f - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
+            float leftIndicator = turnDirection < 0 ? 1f - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
 
             // Ensure the indicators are within the range [0, 1]
             rightIndicator = Mathf.Clamp(rightIndicator, 0f, 1f);

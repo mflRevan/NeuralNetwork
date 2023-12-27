@@ -9,7 +9,6 @@ namespace Default
     {
         [SerializeField] private NavMeshAgent agent;
 
-        public NavMeshAgent Agent => agent;
         public Vector3 TargetDirection { get; private set; }
 
         private float lastDistance;
@@ -18,6 +17,7 @@ namespace Default
         {
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
             agent.updatePosition = false;
+            agent.updateRotation = false;
         }
 
         public void SetTarget(Vector3 pos)
@@ -29,6 +29,11 @@ namespace Default
         public bool HasTarget()
         {
             return agent.hasPath;
+        }
+
+        public Vector3 GetTarget()
+        {
+            return agent.pathEndPosition;
         }
 
         public float GetCurrentDistanceToTarget()
@@ -61,6 +66,11 @@ namespace Default
         {
             // agent.ResetPath();
             agent.isStopped = true;
+        }
+
+        public void Warp(Vector3 pos)
+        {
+            agent.Warp(pos);
         }
 
         private void FixedUpdate()

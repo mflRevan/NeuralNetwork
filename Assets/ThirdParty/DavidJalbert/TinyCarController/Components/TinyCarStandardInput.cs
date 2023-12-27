@@ -60,7 +60,8 @@ namespace DavidJalbert
         private List<Dataset> trainingDataBuffer;
         private bool collectingTrainingData;
         private float collectCooldown;
-        private const float COLLECT_INTERVAL = 0.5f;
+
+        private const float COLLECT_INTERVAL = 0.1f;
 
 
         void Start()
@@ -79,7 +80,6 @@ namespace DavidJalbert
 
             float motorDelta = getInput(forwardInput) - getInput(reverseInput);
             float steeringDelta = getInput(steerRightInput) - getInput(steerLeftInput);
-
 
             // if (getInput(boostInput) == 1 && boostTimer == 0)
             // {
@@ -101,11 +101,11 @@ namespace DavidJalbert
                 carController.setMotor(0f);
                 carController.setSteering(0f);
                 carController.setBoostMultiplier(1f);
-                aiController.SetPositionAndRotation(GameManager.Instance.spawn.position, GameManager.Instance.spawn.rotation);
+                aiController.SetPositionAndRotation(GameManager.Instance.activeRaceTrack.spawn.position, GameManager.Instance.activeRaceTrack.spawn.rotation).Forget();
             }
 
             // collect training data 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && !GameManager.Instance.IsTrainingActive && !GameManager.Instance.IsEvolutionActive)
             {
                 // toggle collecting
 
@@ -115,7 +115,7 @@ namespace DavidJalbert
                 }
                 else
                 {
-                    aiController?.SetTarget(GameManager.Instance.target.position);
+                    aiController?.SetTarget(GameManager.Instance.activeRaceTrack.GetRandomTargetAndActivateIt().position);
                 }
 
                 collectingTrainingData = !collectingTrainingData;
@@ -154,8 +154,8 @@ namespace DavidJalbert
             // desired output (corresponds to the human input )
             var desiredOutput = new float[3];
 
-            desiredOutput[0] = getInput(forwardInput);
-            desiredOutput[1] = getInput(steerRightInput) - getInput(steerLeftInput);
+            desiredOutput[0] = getInput(forwardInput); // normalize
+            desiredOutput[1] = (getInput(steerRightInput) - getInput(steerLeftInput) + 1f) / 2f; // normalize => left = 0 - 0.5 and right = 0.5 - 1 
             desiredOutput[2] = getInput(boostInput);
 
             // training input (processed environment data)

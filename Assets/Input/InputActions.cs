@@ -172,6 +172,15 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Boost"",
+                    ""type"": ""Button"",
+                    ""id"": ""7960f036-8832-44e6-8e94-e81c4c0da3af"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -251,6 +260,17 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Brake"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""65770252-3a54-478f-ad9f-9a63833bf252"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Boost"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -269,6 +289,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_Driver = asset.FindActionMap("Driver", throwIfNotFound: true);
         m_Driver_DriveInput = m_Driver.FindAction("DriveInput", throwIfNotFound: true);
         m_Driver_Brake = m_Driver.FindAction("Brake", throwIfNotFound: true);
+        m_Driver_Boost = m_Driver.FindAction("Boost", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -418,12 +439,14 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private List<IDriverActions> m_DriverActionsCallbackInterfaces = new List<IDriverActions>();
     private readonly InputAction m_Driver_DriveInput;
     private readonly InputAction m_Driver_Brake;
+    private readonly InputAction m_Driver_Boost;
     public struct DriverActions
     {
         private @InputActions m_Wrapper;
         public DriverActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @DriveInput => m_Wrapper.m_Driver_DriveInput;
         public InputAction @Brake => m_Wrapper.m_Driver_Brake;
+        public InputAction @Boost => m_Wrapper.m_Driver_Boost;
         public InputActionMap Get() { return m_Wrapper.m_Driver; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -439,6 +462,9 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @Brake.started += instance.OnBrake;
             @Brake.performed += instance.OnBrake;
             @Brake.canceled += instance.OnBrake;
+            @Boost.started += instance.OnBoost;
+            @Boost.performed += instance.OnBoost;
+            @Boost.canceled += instance.OnBoost;
         }
 
         private void UnregisterCallbacks(IDriverActions instance)
@@ -449,6 +475,9 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @Brake.started -= instance.OnBrake;
             @Brake.performed -= instance.OnBrake;
             @Brake.canceled -= instance.OnBrake;
+            @Boost.started -= instance.OnBoost;
+            @Boost.performed -= instance.OnBoost;
+            @Boost.canceled -= instance.OnBoost;
         }
 
         public void RemoveCallbacks(IDriverActions instance)
@@ -479,5 +508,6 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     {
         void OnDriveInput(InputAction.CallbackContext context);
         void OnBrake(InputAction.CallbackContext context);
+        void OnBoost(InputAction.CallbackContext context);
     }
 }

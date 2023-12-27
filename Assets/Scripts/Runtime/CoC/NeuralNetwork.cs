@@ -64,7 +64,7 @@ namespace Default
             CopyBiases(data.biases);
             CopyWeights(data.weights);
 
-            fitness = data.fitness == float.NaN ? 0f : data.fitness;
+            fitness = data.fitness == float.NaN || !float.IsFinite(data.fitness) ? 0f : data.fitness;
         }
 
         /// <summary>
@@ -260,8 +260,11 @@ namespace Default
                 {
                     for (var k = 0; k < neurons[j].Length; k++)
                     {
-                        var biasSmudge = SigmoidDerivative(neurons[j][k]) // activation function
-                                        * (desiredNeurons[j][k] - neurons[j][k]); // cost function for single neuron
+                        var costForSingleNeuron = neurons[j][k] * (desiredNeurons[j][k] - neurons[j][k]);
+
+                        var biasSmudge = j >= neurons.Length - 1 ?
+                            SigmoidDerivative(costForSingleNeuron)
+                            : ReLUDerivative(costForSingleNeuron);
                         biasesSmudge[j][k] += biasSmudge;
 
                         for (var l = 0; l < neurons[j - 1].Length; l++)
@@ -320,7 +323,9 @@ namespace Default
             {
                 for (var j = 0; j < neurons[i].Length; j++)
                 {
-                    var activationValue = Sigmoid(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
+                    var activationValue = i >= neurons.Length - 1 ? // only use sigmoid for the output layer
+                        Sigmoid(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j])
+                        : ReLU(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
 
                     neurons[i][j] = activationValue;
                     desiredNeurons[i][j] = neurons[i][j];
@@ -339,10 +344,37 @@ namespace Default
         private static float Sum(IEnumerable<float> values, IReadOnlyList<float> weights) =>
             values.Select((v, i) => v * weights[i]).Sum();
 
-        // activation function
-        private static float Sigmoid(float x) => 1f / (1f + (float)Math.Exp(-x));
 
-        private static float SigmoidDerivative(float x) => x * (1 - x);
+        // Tanh 
+        public static float Tanh(float value)
+        {
+            return (float)Math.Tanh(value);
+        }
+
+        public static float TanhDerivative(float value)
+        {
+            var tanhValue = (float)Math.Tanh(value);
+            return 1f - tanhValue * tanhValue;
+        }
+
+        // ReLU 
+        public static float ReLU(float value)
+        {
+            return Math.Max(0f, value);
+        }
+
+        public static float ReLUDerivative(float value)
+        {
+            return value > 0f ? 1f : 0f;
+        }
+
+        // Sigmoid 
+        private static float Sigmoid(float x)
+        {
+            return 1f / (1f + (float)Math.Exp(-x));
+        }
+
+        private static float SigmoidDerivative(float x) => x * (1f - x);
 
         private static float HardSigmoid(float x)
         {
@@ -360,9 +392,9 @@ namespace Default
         }
 
         /// <summary>
-        /// Mutate weights and biases
+        /// Mutate weights and biases, epochs without improvement increases the chance of mutation for every weight
         /// </summary>
-        public void Mutate()
+        public void Mutate(float chanceMultiplier = 1f, float strengthMultiplier = 1f)
         {
             for (int i = 0; i < weights.Length; i++)
             {
@@ -372,24 +404,24 @@ namespace Default
                     {
                         float weight = weights[i][j][k];
 
-                        //mutate weight value 
+                        // mutate chance
                         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                        if (randomNumber <= 2f)
+                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance * multiplier
                         {
                             weight *= -1f;
                         }
-                        else if (randomNumber <= 4f)
+                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance * multiplier
                         {
                             weight = UnityEngine.Random.Range(-0.5f, 0.5f);
                         }
-                        else if (randomNumber <= 6f)
+                        else if (randomNumber <= 5f * chanceMultiplier) // 3% Chance * multiplier
                         {
-                            weight *= UnityEngine.Random.Range(1f, 2f);
+                            weight *= UnityEngine.Random.Range(1f, 1f + strengthMultiplier);
                         }
-                        else if (randomNumber <= 8f)
+                        else if (randomNumber <= 8f * chanceMultiplier) // 3% Chance * multiplier
                         {
-                            weight *= UnityEngine.Random.Range(0f, 1f);
+                            weight *= UnityEngine.Random.Range(1f * (1f - strengthMultiplier), 1f);
                         }
 
                         weights[i][j][k] = weight;
@@ -397,31 +429,31 @@ namespace Default
                 }
             }
 
-            for (int i = 0; i < biases.Length; i++)
-            {
-                for (int j = 0; j < biases[i].Length; j++)
-                {
-                    float bias = biases[i][j];
+            // for (int i = 0; i < biases.Length; i++)
+            // {
+            //     for (int j = 0; j < biases[i].Length; j++)
+            //     {
+            //         float bias = biases[i][j];
 
-                    //mutate bias value 
-                    float randomNumber = UnityEngine.Random.Range(0f, 100f);
+            //         //mutate bias value 
+            //         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                    if (randomNumber <= 1f)
-                    {
-                        bias *= -1f;
-                    }
-                    else if (randomNumber <= 3f)
-                    {
-                        bias = UnityEngine.Random.Range(-0.5f, 0.5f);
-                    }
-                    else if (randomNumber <= 5f)
-                    {
-                        bias += UnityEngine.Random.Range(-1f, 1f);
-                    }
+            //         if (randomNumber <= 1f)
+            //         {
+            //             bias *= -1f;
+            //         }
+            //         else if (randomNumber <= 3f)
+            //         {
+            //             bias = UnityEngine.Random.Range(-0.5f, 0.5f);
+            //         }
+            //         else if (randomNumber <= 5f)
+            //         {
+            //             bias += UnityEngine.Random.Range(-1f, 1f);
+            //         }
 
-                    biases[i][j] = bias;
-                }
-            }
+            //         biases[i][j] = bias;
+            //     }
+            // }
         }
 
         public void AddFitness(float fit)

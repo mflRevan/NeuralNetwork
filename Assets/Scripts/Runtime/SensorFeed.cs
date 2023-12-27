@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Default
 {
     public class SensorFeed : MonoBehaviour
     {
-        public const float RANGE_FORWARD = 50f;
-        public const float RANGE_SIDE = 30f;
+        public const float RANGE_FORWARD = 80f;
+        public const float RANGE_SIDE = 40f;
         public const float RANGE_BACKWARD = 20f;
-        public const float MAX_SLOPE = 45f;
+        public const float RANGE_CURVE = 100f;
         public const float AGENT_RADIUS = 2.5f;
 
 
@@ -18,15 +19,14 @@ namespace Default
 
         public float[] GetSensorData()
         {
-            var output = new float[Sensors.Count];
+            var output = new List<float>();
 
-            for (int i = 0; i < Sensors.Count; i++)
+            foreach (var sensor in Sensors)
             {
-                var s = Sensors[i];
-                output[i] = s.GetFeed();
+                output.AddRange(sensor.GetFeed());
             }
 
-            return output;
+            return output.ToArray();
         }
     }
 }
