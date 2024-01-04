@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     [Header("Config - Backpropagation Training"), Space]
     [SerializeField] private bool startWithRandomizedNetworks;
     [SerializeField] private bool saveConvergedModels;
-    [SerializeField] private bool saveEvaluationData;
+    [SerializeField] private bool saveEvaluationDataTraining;
     [SerializeField] private bool trainWithLocalBuffer;
     [SerializeField] private bool saveLocalBufferToData;
     [SerializeField] private int trainingRepetitions = 10;
@@ -44,9 +44,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float weightDecay = 0.005f;
 
     [Header("Config - Genetic Engineering"), Space]
+    [SerializeField] private bool saveEvaluationDataEvolution;
     [SerializeField] private bool startWithNewNeuralNetworks;
     [SerializeField] private bool saveFittestNetworks;
-    [SerializeField] private int epochsCount;
+    [SerializeField] private int epochsCount = 100;
+    [SerializeField] private int evolutionCycles = 1;
+    [SerializeField] private int layerLengthAdditionPerCycle = 1;
+    [SerializeField] private int hidderLayerAdditionIndex = 0;
     [SerializeField, Tooltip("Mutation strength based on how near the agent is to the target.")] private AnimationCurve relativeMutationStrength;
     [SerializeField] private int numberOfEpochsWithoutImprovementUntilReset = 7;
 
@@ -60,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private int numberOfEpochsWithoutImprovementCounter;
 
+    private const string EVOLUTION_EVALTEXT_PATH = "/Evaluation/EvolutionEval.json";
     private const float MAX_MUTATION_CHANCE_MULTIPLIER = 2f;
     private const float CRASH_PENALTY = 0f;
     private const float FITNESS_DISTANCE_SCALE = 100f;
@@ -152,7 +157,7 @@ public class GameManager : MonoBehaviour
         if (IsTrainingActive) { return; } // if current training process is not finished 
 
         var currentLearningRates = new float[activeAgents.Count];
-        var evalutationData = new EvaluationData();
+        var evalutationData = new TrainingEvaluationData();
 
         IsTrainingActive = true;
 
@@ -173,7 +178,7 @@ public class GameManager : MonoBehaviour
             activeAgents[i].SetUIHeader($"{currentLearningRates[i]}");
 
             // initialize evaluationData with correct learning rates
-            evalutationData.Evaluations.Add(new Evaluation(currentLearningRates[i]));
+            evalutationData.Evaluations.Add(new TrainingEvaluation(currentLearningRates[i]));
         }
 
         // training repetitions
@@ -212,7 +217,7 @@ public class GameManager : MonoBehaviour
         }
 
         // save evaluation data
-        if (saveEvaluationData)
+        if (saveEvaluationDataTraining)
         {
             var contents = JsonConvert.SerializeObject(evalutationData);
             var path = $"{Application.dataPath}/Evaluation/BackPropEval.json";
@@ -227,7 +232,7 @@ public class GameManager : MonoBehaviour
 
     #region Evolution
 
-    private void InitializeGeneticEngineering()
+    private void InitializeEvolution(int evolutionCycle)
     {
         statusText.text = "Initializing...";
 
@@ -238,7 +243,15 @@ public class GameManager : MonoBehaviour
                 var layers = new List<int>();
 
                 layers.Add(AICarController.INPUT_NEURONS);
-                layers.AddRange(networkHiddenLayerStructure_Evolution);
+
+                for (int i = 0; i < networkHiddenLayerStructure_Evolution.Length; i++)
+                {
+                    var layer = networkHiddenLayerStructure_Evolution[i];
+                    layer += i == hidderLayerAdditionIndex ? (evolutionCycle * layerLengthAdditionPerCycle) : 0;
+
+                    layers.Add(layer);
+                }
+
                 layers.Add(AICarController.OUTPUT_NEURONS);
 
                 agent.SetAI(new NeuralNetwork(layers.ToArray(), true));
@@ -254,9 +267,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartEvolution()
+    public async void StartEvolution()
     {
-        Evolution(epochsCount).Forget();
+        for (int i = 0; i < evolutionCycles; i++)
+        {
+            InitializeEvolution(i);
+
+            await Evolution(epochsCount);
+        }
     }
 
     private void GeneticEngineering(NeuralNetwork[] fittestNetworks, float fitnessDifference, float highestCompletionPercentage)
@@ -348,7 +366,8 @@ public class GameManager : MonoBehaviour
 
         NeuralNetwork[] fittestNetworks = new NeuralNetwork[3];
 
-        InitializeGeneticEngineering();
+        EvolutionEvaluation evalData = new();
+        evalData.LayerStructure = activeAgents[0].AI.layers.ToList<int>();
 
         for (int i = 0; i < epochs; i++)
         {
@@ -444,7 +463,14 @@ public class GameManager : MonoBehaviour
                 noImprovementCounterText.text = $"[Epoch {i}]Epochs without improvement: {numberOfEpochsWithoutImprovementCounter}" + (numberOfEpochsWithoutImprovementCounter <= 0 ? ", has been Reset" : "");
             }
 
+            evalData.FitnessConvergence.Add(currentHighestFitness);
+
             fitnessText.text = $"[Epoch {i}]Highest Fitness: {highestFitness} (Difference of {fitnessDifference})";
+        }
+
+        if (saveEvaluationDataEvolution)
+        {
+            File.WriteAllText(Application.dataPath + EVOLUTION_EVALTEXT_PATH, $"\n\n{JsonConvert.SerializeObject(evalData)}");
         }
 
         IsEvolutionActive = false;

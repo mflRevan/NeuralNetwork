@@ -1,27 +1,42 @@
 using System;
 using System.Collections.Generic;
 
-[Serializable]
-public class EvaluationData
-{
-    public List<Evaluation> Evaluations;
+// Training
 
-    public EvaluationData()
+[Serializable]
+public class TrainingEvaluationData
+{
+    public List<TrainingEvaluation> Evaluations;
+
+    public TrainingEvaluationData()
     {
         Evaluations = new();
     }
 }
 
 [Serializable]
-public class Evaluation
+public class TrainingEvaluation
 {
     public float LearningRate;
     public List<float> FitnessConvergence;
 
-    public Evaluation(float learningRate)
+    public TrainingEvaluation(float learningRate)
     {
         LearningRate = learningRate;
 
+        FitnessConvergence = new();
+    }
+}
+
+[Serializable]
+public class EvolutionEvaluation
+{
+    public List<int> LayerStructure;
+    public List<float> FitnessConvergence;
+
+    public EvolutionEvaluation()
+    {
+        LayerStructure = new();
         FitnessConvergence = new();
     }
 }
