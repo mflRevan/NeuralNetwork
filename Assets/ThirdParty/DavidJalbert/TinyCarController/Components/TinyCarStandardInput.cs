@@ -2,8 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Default;
 using TMPro;
-using Unity.Android.Gradle.Manifest;
-using Unity.Barracuda;
 using UnityEngine;
 
 namespace DavidJalbert

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Default;
 
 // Training
 
@@ -29,14 +30,36 @@ public class TrainingEvaluation
 }
 
 [Serializable]
+public class EvolutionEvaluationData
+{
+    public string _info;
+    public string _additionalNotes;
+    public List<EvolutionEvaluation> Evaluations;
+
+    public EvolutionEvaluationData()
+    {
+        Evaluations = new();
+    }
+}
+
+[Serializable]
 public class EvolutionEvaluation
 {
     public List<int> LayerStructure;
     public List<float> FitnessConvergence;
+    public SerializedNetworkData fittestNetwork;
 
     public EvolutionEvaluation()
     {
         LayerStructure = new();
         FitnessConvergence = new();
+    }
+
+    public EvolutionEvaluation(NeuralNetwork fittestNetwork)
+    {
+        LayerStructure = new();
+        FitnessConvergence = new();
+
+        this.fittestNetwork = new SerializedNetworkData(fittestNetwork);
     }
 }

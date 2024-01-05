@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 
 namespace Default
 {
-    public struct SerializedNetworkData
+    [Serializable]
+    public class SerializedNetworkData
     {
         public int[] layers;
         public float[][] biases;

@@ -90,7 +90,7 @@ namespace Default
         }
 
         /// <summary>
-        /// Mating two networks and mixing the weights
+        /// Mating two networks and mixing the weights and biases
         /// </summary>
         /// <param name="otherParent">Other mate</param>
         /// <returns>Returns the child of the two networks!</returns>
@@ -407,11 +407,11 @@ namespace Default
                         // mutate chance
                         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance * multiplier
+                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance
                         {
                             weight *= -1f;
                         }
-                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance * multiplier
+                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance
                         {
                             weight = UnityEngine.Random.Range(-0.5f, 0.5f);
                         }
@@ -421,7 +421,7 @@ namespace Default
                         }
                         else if (randomNumber <= 8f * chanceMultiplier) // 3% Chance * multiplier
                         {
-                            weight *= UnityEngine.Random.Range(1f * (1f - strengthMultiplier), 1f);
+                            weight *= UnityEngine.Random.Range(Mathf.Clamp01(1f - strengthMultiplier), 1f);
                         }
 
                         weights[i][j][k] = weight;
