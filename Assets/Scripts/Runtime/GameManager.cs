@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private Button startEvolutionButton;
+    [SerializeField] private TMP_Text evolutionCycleText;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private TMP_Text fitnessText;
     [SerializeField] private TMP_Text noImprovementCounterText;
@@ -53,6 +54,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int hidderLayerAdditionIndex = 0;
     [SerializeField, Tooltip("Mutation strength based on how near the agent is to the target.")] private AnimationCurve relativeMutationStrength;
     [SerializeField] private int numberOfEpochsWithoutImprovementUntilReset = 7;
+    [SerializeField, TextArea, Tooltip("Text snippet added at the top of the eval file!")] private string evalInformation;
 
     public bool IsTrainingActive { get; private set; }
     public bool IsEvolutionActive { get; private set; }
@@ -64,7 +66,7 @@ public class GameManager : MonoBehaviour
 
     private int numberOfEpochsWithoutImprovementCounter;
 
-    private const string EVOLUTION_EVALTEXT_PATH = "/Evaluation/EvolutionEval.json";
+    private const string EVOLUTION_EVALTEXT_PATH = "/Evaluation";
     private const float MAX_MUTATION_CHANCE_MULTIPLIER = 2f;
     private const float CRASH_PENALTY = 0f;
     private const float FITNESS_DISTANCE_SCALE = 100f;
@@ -271,9 +273,11 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < evolutionCycles; i++)
         {
+            evolutionCycleText.text = $"Evolution Cycle: {i}";
+
             InitializeEvolution(i);
 
-            await Evolution(epochsCount);
+            await Evolution(epochsCount, i);
         }
     }
 
@@ -355,7 +359,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private async UniTask Evolution(int epochs)
+    private async UniTask Evolution(int epochs, int currentCycle)
     {
         var highestFitness = 0f;
         var currentHighestFitness = 0f;
@@ -378,7 +382,7 @@ public class GameManager : MonoBehaviour
                 GeneticEngineering(fittestNetworks, fitnessDifference, highestCompletionPercentage);
             }
 
-            statusText.text = $"[Epoch {i}]Evolution...";
+            statusText.text = $"[Epoch {i}]Evolution with {activeAgents.Count} active agents...";
 
             foreach (var agent in activeAgents)
             {
@@ -470,7 +474,23 @@ public class GameManager : MonoBehaviour
 
         if (saveEvaluationDataEvolution)
         {
-            File.WriteAllText(Application.dataPath + EVOLUTION_EVALTEXT_PATH, $"\n\n{JsonConvert.SerializeObject(evalData)}");
+            var hiddenLayerStructureName = "";
+
+            foreach (var neurons in networkHiddenLayerStructure_Evolution)
+            {
+                hiddenLayerStructureName += $"{neurons}_";
+            }
+
+            hiddenLayerStructureName += $"Add{layerLengthAdditionPerCycle}";
+
+            if (currentCycle == 0) // if first evolution cycle, append important information at the top
+            {
+                File.AppendAllText($"{Application.dataPath}{EVOLUTION_EVALTEXT_PATH}/Eval_{hiddenLayerStructureName}.json",
+                    @$"A total of {evolutionCycles} cycles, each trained for {epochsCount} epochs, with a total of {activeAgents.Count} agents.\n\n
+                    {evalInformation}\n\n");
+            }
+
+            File.AppendAllText($"{Application.dataPath}{EVOLUTION_EVALTEXT_PATH}/Eval_{hiddenLayerStructureName}.json", $"{JsonConvert.SerializeObject(evalData)}\n\n");
         }
 
         IsEvolutionActive = false;
