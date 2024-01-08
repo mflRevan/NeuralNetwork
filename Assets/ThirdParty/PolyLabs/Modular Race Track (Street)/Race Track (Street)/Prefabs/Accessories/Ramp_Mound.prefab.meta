@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a90233b06e36f5f45a91ee11581a1c95
+timeCreated: 1525568927
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Accessories/Ramp_Mound.prefab
+  uploadId: 550506

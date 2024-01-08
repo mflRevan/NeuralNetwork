@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bdf09bd2292545747940486b4aa4b52e
+timeCreated: 1525624244
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Track
+    Pieces/Transition_Up_Pitch2.prefab
+  uploadId: 550506

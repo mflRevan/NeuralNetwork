@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 7b3f269da89820e429b57352f9e00e77
+timeCreated: 1525569362
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Demo
+    Scenes/Sample Track.unity
+  uploadId: 550506

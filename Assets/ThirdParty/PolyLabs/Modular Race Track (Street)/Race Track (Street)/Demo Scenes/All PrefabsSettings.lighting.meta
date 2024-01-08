@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: ff2caaf62556d43c9a4af7f104628263
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Demo
+    Scenes/All PrefabsSettings.lighting
+  uploadId: 550506

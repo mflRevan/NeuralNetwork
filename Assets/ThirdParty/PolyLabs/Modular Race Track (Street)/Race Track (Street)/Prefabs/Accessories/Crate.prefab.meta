@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ce85e9cbc382aa041a2c859f8b659600
+timeCreated: 1525568929
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Accessories/Crate.prefab
+  uploadId: 550506

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 05c92e151902247b59b1e1930e40f931
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/BonusAssets/PrototypeMats/polylabs_proto_light.mat
+  uploadId: 550506

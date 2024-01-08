@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d4ffeadd33d17e54386231e34343d5af
+timeCreated: 1525624230
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Track
+    Pieces/Turn_Pitch1.prefab
+  uploadId: 550506

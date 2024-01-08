@@ -17,12 +17,7 @@ namespace Default
 
         private void OnTriggerEnter(Collider other)
         {
-            var colliderMask = LayerMask.GetMask(LayerMask.LayerToName(other.gameObject.layer));
-
-            if (GameManager.Instance.WallMask == colliderMask)
-            {
-                WallHit?.Invoke();
-            }
+            WallHit?.Invoke();
         }
     }
 }

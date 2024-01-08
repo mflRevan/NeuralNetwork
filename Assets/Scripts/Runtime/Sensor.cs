@@ -17,34 +17,40 @@ namespace Default
         [SerializeField] private SensorDirection sensorDirection;
         public SensorDirection Direction => sensorDirection;
 
+        private const float MAX_DOT_WALLDETECTION = 0.5f;
+
         /// <summary>
         /// Get the sensordata
         /// </summary>
         /// <returns>Returns the either the distance as float percentage (0 - 1), (1) being the max distance, or if the sensor is a curve detector it returns the curve direction encoded into 2 floats</returns>
         public float[] GetFeed()
         {
-            LayerMask mask = GameManager.Instance != null ? GameManager.Instance.WallMask : 0;
+            LayerMask mask = GameManager.Instance != null ? GameManager.Instance.RoadMask : LayerMask.GetMask("Road");
 
             var hit = new RaycastHit();
-            List<float> results = new();
+            var hitValid = false;
+            var results = new List<float>();
 
             switch (Direction)
             {
                 case SensorDirection.FORWARD:
                     Physics.SphereCast(transform.position, SensorFeed.AGENT_RADIUS, transform.forward, out hit, SensorFeed.RANGE_FORWARD, mask, QueryTriggerInteraction.Ignore);
-                    results.Add(hit.collider != null ? Vector3.Distance(transform.position, hit.point) / SensorFeed.RANGE_FORWARD : 1f);
+                    hitValid = hit.collider != null && Vector3.Dot(hit.normal, transform.up) < MAX_DOT_WALLDETECTION;
+                    results.Add(hitValid ? Vector3.Distance(transform.position, hit.point) / SensorFeed.RANGE_FORWARD : 1f);
                     break;
 
                 case SensorDirection.SIDE:
                     Physics.Raycast(transform.position, transform.forward, out hit, SensorFeed.RANGE_SIDE, mask, QueryTriggerInteraction.Ignore);
-                    results.Add(hit.collider != null ? Vector3.Distance(transform.position, hit.point) / SensorFeed.RANGE_SIDE : 1f);
+                    hitValid = hit.collider != null && Vector3.Dot(hit.normal, transform.up) < MAX_DOT_WALLDETECTION;
+                    results.Add(hitValid ? Vector3.Distance(transform.position, hit.point) / SensorFeed.RANGE_SIDE : 1f);
                     break;
 
                 case SensorDirection.CURVE_DETECTOR:
                     Physics.Raycast(transform.position, transform.forward, out hit, SensorFeed.RANGE_CURVE, mask, QueryTriggerInteraction.Ignore);
+                    hitValid = hit.collider != null && Vector3.Dot(hit.normal, transform.up) < MAX_DOT_WALLDETECTION;
                     var crossY = Vector3.Cross(transform.forward, hit.normal).y;
-                    results.Add(crossY <= 0f ? 1f : Mathf.Abs(crossY));
-                    results.Add(crossY >= 0f ? 1f : Mathf.Abs(crossY));
+                    results.Add(crossY <= 0f && hitValid ? 1f : Mathf.Abs(crossY));
+                    results.Add(crossY >= 0f && hitValid ? 1f : Mathf.Abs(crossY));
                     break;
             }
 

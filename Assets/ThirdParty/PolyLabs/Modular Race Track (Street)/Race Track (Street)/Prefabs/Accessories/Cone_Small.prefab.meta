@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a901c9060fdc42444bfc7e1b46c71c85
+timeCreated: 1525568931
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Accessories/Cone_Small.prefab
+  uploadId: 550506

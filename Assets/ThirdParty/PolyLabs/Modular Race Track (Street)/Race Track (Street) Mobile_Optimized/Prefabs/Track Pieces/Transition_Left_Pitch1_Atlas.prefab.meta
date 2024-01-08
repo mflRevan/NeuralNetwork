@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 23ebfbc21548a4f589048fd078a56387
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street) Mobile_Optimized/Prefabs/Track
+    Pieces/Transition_Left_Pitch1_Atlas.prefab
+  uploadId: 550506

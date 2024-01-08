@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 521c5fba82e13654388bba0de5cb274f
+timeCreated: 1525624219
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Track
+    Pieces/Corner_Pitch1.prefab
+  uploadId: 550506

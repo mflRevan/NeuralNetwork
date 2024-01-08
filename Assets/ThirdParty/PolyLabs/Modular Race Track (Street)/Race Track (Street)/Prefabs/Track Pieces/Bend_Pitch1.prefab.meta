@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a8939e8171976ff48ab0e70be9d4284b
+timeCreated: 1525624213
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Track
+    Pieces/Bend_Pitch1.prefab
+  uploadId: 550506

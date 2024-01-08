@@ -10,7 +10,7 @@ namespace Default
         public const float RANGE_SIDE = 40f;
         public const float RANGE_BACKWARD = 20f;
         public const float RANGE_CURVE = 100f;
-        public const float AGENT_RADIUS = 2.5f;
+        public const float AGENT_RADIUS = 1f;
 
 
         [SerializeField] private List<Sensor> sensors;

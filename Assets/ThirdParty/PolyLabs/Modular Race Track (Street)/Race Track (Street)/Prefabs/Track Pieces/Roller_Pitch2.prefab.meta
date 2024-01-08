@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8616e6a9fb514d443a3ba2bea0d1c9a3
+timeCreated: 1525624261
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118701
+  packageName: Modular Race Track (street)
+  packageVersion: 1.1
+  assetPath: Assets/PolyLabs/Modular Race Track (Street)/Race Track (Street)/Prefabs/Track
+    Pieces/Roller_Pitch2.prefab
+  uploadId: 550506

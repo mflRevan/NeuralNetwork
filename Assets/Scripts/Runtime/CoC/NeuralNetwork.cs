@@ -407,21 +407,21 @@ namespace Default
                         // mutate chance
                         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance
+                        if (randomNumber <= 2f * chanceMultiplier) // 2% Chance * chancemultiplier
                         {
-                            weight *= -1f;
+                            weight += UnityEngine.Random.Range(-strengthMultiplier, strengthMultiplier); // addition pos/neg
                         }
-                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance
+                        else if (randomNumber <= 3f * chanceMultiplier) // 1% Chance * chancemultiplier
                         {
-                            weight = UnityEngine.Random.Range(-0.5f, 0.5f);
+                            weight = UnityEngine.Random.Range(-0.5f, 0.5f); // reset 
                         }
-                        else if (randomNumber <= 5f * chanceMultiplier) // 3% Chance * multiplier
+                        else if (randomNumber <= 6f * chanceMultiplier) // 3% Chance * chancemultiplier
                         {
-                            weight *= UnityEngine.Random.Range(1f, 1f + strengthMultiplier);
+                            weight *= UnityEngine.Random.Range(1f, 1f + strengthMultiplier); // multiplication 1 to strengthmultiplier
                         }
-                        else if (randomNumber <= 8f * chanceMultiplier) // 3% Chance * multiplier
+                        else if (randomNumber <= 9f * chanceMultiplier) // 3% Chance * chancemultiplier
                         {
-                            weight *= UnityEngine.Random.Range(Mathf.Clamp01(1f - strengthMultiplier), 1f);
+                            weight *= UnityEngine.Random.Range(1f / (2f + strengthMultiplier), 0.9f); // division by 0.9 to 0.5 and smaller depending on strengthmultiplier
                         }
 
                         weights[i][j][k] = weight;

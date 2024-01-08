@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
@@ -24,7 +23,7 @@ namespace Default
         public bool AIDrivingEnabled { get; private set; }
         public float InitialDistance => initialDistance;
 
-        private float[] NNInputBuffer;
+        public float[] NNInputBuffer { get; private set; }
 
         private float motorInput;
         private float steeringInput;
@@ -280,7 +279,7 @@ namespace Default
             // Determine the direction of the turn using cross product
             float turnDirection = Vector3.Cross(carForward, directionIndicator).y;
 
-            // Calculate the encoded outputs, inverted for better processing by the AI (due to sigmoid)
+            // Calculate the encoded outputs, inverted for better processing by the AI 
             float rightIndicator = turnDirection > 0 ? 1f - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
             float leftIndicator = turnDirection < 0 ? 1f - (angle / TURN_INDICATOR_PROCESSING_THRESHHOLD_MAX_ANGLE) : 1f;
 

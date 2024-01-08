@@ -29,6 +29,8 @@ namespace DavidJalbert
         public Vector3 thirdPersonOffset = new Vector3(0, 2, -10);
         [Tooltip("Rotation of the camera relative to the target.")]
         public Vector3 thirdPersonAngle = new Vector3(15, 0, 0);
+        public bool continuousYRotation;
+        public float continuousYRotationSpeed = 15f;
         [Tooltip("The minimum distance to keep when an obstacle is in the way of the camera.")]
         public float thirdPersonSkinWidth = 0.1f;
         [Tooltip("Smoothing of the camera's rotation. The lower the value, the smoother the rotation. Set to 0 to disable smoothing.")]
@@ -42,6 +44,12 @@ namespace DavidJalbert
 
         void FixedUpdate()
         {
+            if (continuousYRotation)
+            {
+                topDownAngle.y += Time.fixedDeltaTime * continuousYRotationSpeed;
+                topDownAngle.y = topDownAngle.y >= 360f ? 0f : topDownAngle.y; // reset to 0 if exceeds 360
+            }
+
             Vector3 followPosition = whatToFollow.position;
             Quaternion followRotation = whatToFollow.rotation;
 
