@@ -35,8 +35,10 @@ namespace Default
         private float furthestDistancePassed;
         private float stuckTimer;
         private float driveTimer;
+        private int skippedFrames;
 
-        public const int INPUT_NEURONS = 7;
+        public const int INFERENCE_FRAMES_TO_SKIP = 2;
+        public const int INPUT_NEURONS = 8;
         public const int OUTPUT_NEURONS = 3;
         public const float BOOST_CONFIDENCE_THRESHHOLD = 0.7f;
         public const float STUCK_MAX_TIMER = 12f;
@@ -63,9 +65,19 @@ namespace Default
             //     print($"To the left: {sensorData[sensorData.Length - 1]}\nTo the right: {sensorData[sensorData.Length - 2]}");
             // }
 
+            // if (isPlayerController) print(GetCurrentSpeedNormalized());
+
             if (!AIDrivingEnabled || AI == null || !targetDirectionAgent.HasTarget()) { return; }
 
-            InputInference();
+            if (skippedFrames >= INFERENCE_FRAMES_TO_SKIP)
+            {
+                InputInference();
+                skippedFrames = 0;
+            }
+            else
+            {
+                skippedFrames++;
+            }
 
             driveTimer += Time.fixedDeltaTime;
 
@@ -119,6 +131,11 @@ namespace Default
             targetDirectionAgent.SetTarget(pos);
             await targetDirectionAgent.WaitUntilHasPath();
             initialDistance = targetDirectionAgent.GetCurrentDistanceToTarget();
+        }
+
+        public float GetCurrentSpeedNormalized()
+        {
+            return tinyCarController.getForwardVelocityDelta() / boostMultiplier;
         }
 
         /// <returns>The completion percentage of the current path</returns>
@@ -218,31 +235,13 @@ namespace Default
                 NNInputBuffer[i] = sensorData[i];
             }
 
-            // // add normalized car speed
-            // var direction = tinyCarController.getVelocityDirection();
-            // var maxSpeed = tinyCarController.getMaxSpeed();
-            // var currentSpeed = Mathf.Abs(tinyCarController.getForwardVelocity());
-
-            // var normalizedForwardSpeed = 0f;
-            // var normalizedBackwardSpeed = 0f;
-
-            // if (direction > 0) // driving forward
-            // {
-            //     normalizedForwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
-            // }
-            // else // driving backward
-            // {
-            //     normalizedBackwardSpeed = 1f - (currentSpeed / maxSpeed); // inverted for improved processing (due to sigmoid) of higher speeds
-            // }
-
-            // NNInputBuffer[sensorData.Length] = normalizedForwardSpeed;
-            // NNInputBuffer[sensorData.Length + 1] = normalizedBackwardSpeed;
+            // add normalized & inverted car speed
+            NNInputBuffer[sensorData.Length] = GetCurrentSpeedNormalized();
 
             // add direction indicators for right and left
             (float rightIndicator, float leftIndicator) = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
-
-            NNInputBuffer[sensorData.Length] = rightIndicator;
-            NNInputBuffer[sensorData.Length + 1] = leftIndicator;
+            NNInputBuffer[sensorData.Length + 1] = rightIndicator;
+            NNInputBuffer[sensorData.Length + 2] = leftIndicator;
 
             return NNInputBuffer;
         }

@@ -407,21 +407,21 @@ namespace Default
                         // mutate chance
                         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                        if (randomNumber <= 2f * chanceMultiplier) // 2% Chance * chancemultiplier
+                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance * chancemultiplier
                         {
-                            weight += UnityEngine.Random.Range(-strengthMultiplier, strengthMultiplier); // addition pos/neg
+                            weight *= -1; // flip
                         }
-                        else if (randomNumber <= 3f * chanceMultiplier) // 1% Chance * chancemultiplier
+                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance * chancemultiplier
                         {
                             weight = UnityEngine.Random.Range(-0.5f, 0.5f); // reset 
                         }
-                        else if (randomNumber <= 6f * chanceMultiplier) // 3% Chance * chancemultiplier
+                        else if (randomNumber <= 5f * chanceMultiplier) // 3% Chance * chancemultiplier
                         {
-                            weight *= UnityEngine.Random.Range(1f, 1f + strengthMultiplier); // multiplication 1 to strengthmultiplier
+                            weight *= UnityEngine.Random.Range(1f, 2f); // multiplication 1 to 2
                         }
-                        else if (randomNumber <= 9f * chanceMultiplier) // 3% Chance * chancemultiplier
+                        else if (randomNumber <= 8f * chanceMultiplier) // 3% Chance * chancemultiplier
                         {
-                            weight *= UnityEngine.Random.Range(1f / (2f + strengthMultiplier), 0.9f); // division by 0.9 to 0.5 and smaller depending on strengthmultiplier
+                            weight *= UnityEngine.Random.Range(0.1f, 1f); // division by 1 to 0.1 and smaller depending on strengthmultiplier
                         }
 
                         weights[i][j][k] = weight;

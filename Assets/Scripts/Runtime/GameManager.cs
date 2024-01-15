@@ -8,8 +8,6 @@ using TMPro;
 using System.IO;
 using Newtonsoft.Json;
 using DavidJalbert;
-using UnityEditor;
-using Unity.VisualScripting.Dependencies.NCalc;
 
 public class GameManager : MonoBehaviour
 {
@@ -55,7 +53,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int evolutionCycles = 1;
     [SerializeField] private int layerLengthAdditionPerCycle = 1;
     [SerializeField] private int hidderLayerAdditionIndex = 0;
-    [SerializeField, Tooltip("Mutation strength based on how near the agent is to the target.")] private AnimationCurve relativeMutationStrength;
+    [SerializeField, Tooltip("Mutation strength based on how near the agent is to the target.")] private AnimationCurve relativeMutationRate;
     [SerializeField] private bool greedy; // enables resetting all the agents to the fittest agent after a set of epochs with no improvement, also scaling the mutation strength for every no-improvement-epoch
     [SerializeField] private int numberOfEpochsWithoutImprovementUntilReset = 6;
     [SerializeField, TextArea, Tooltip("Text snippet added at the top of the eval file!")] private string additionalNotes;
@@ -70,13 +68,14 @@ public class GameManager : MonoBehaviour
     private EvolutionEvaluationData evolutionEvaluationData;
 
     private int numberOfEpochsWithoutImprovementCounter;
+    private float evolutionTimer;
 
     private const string EVOLUTION_EVALTEXT_PATH = "/Evaluation";
     private const float CRASH_PENALTY = 0f;
     private const float FITNESS_DISTANCE_SCALE = 100f;
-    private const float FITNESS_SPEED_SCALE = 8f;
-    private const float FINISH_REWARD = 600;
-    private const float MAX_MUTATION_STRENGTH_DIVIDER = 20f;
+    private const float FITNESS_SPEED_SCALE = 3f;
+    private const float FINISH_REWARD = 0;
+    private const float MAX_MUTATION_STRENGTH_DIVIDER = 7f;
 
 
     private void Awake()
@@ -94,6 +93,11 @@ public class GameManager : MonoBehaviour
     private void LateUpdate()
     {
         Time.timeScale = timeScale;
+
+        if (IsEvolutionActive)
+        {
+            evolutionTimer += Time.deltaTime;
+        }
     }
 
     public async UniTask WaitUntilAllAgentsReset()
@@ -130,17 +134,17 @@ public class GameManager : MonoBehaviour
         var fitness = 0f;
         var hasFinished = finishTime >= 0.5f;
 
-        var rightIndicator = 1f - agentToEvaluate.NNInputBuffer[agentToEvaluate.NNInputBuffer.Length - 1];
-        var leftIndicator = 1f - agentToEvaluate.NNInputBuffer[agentToEvaluate.NNInputBuffer.Length - 2];
+        // var rightIndicator = 1f - agentToEvaluate.NNInputBuffer[^1];
+        // var leftIndicator = 1f - agentToEvaluate.NNInputBuffer[^2];
+        // fitness -= rightIndicator + leftIndicator;
 
         fitness += completedPercentage * FITNESS_DISTANCE_SCALE;
         fitness += hasCrashed ? -CRASH_PENALTY : 0f;
-        fitness -= rightIndicator + leftIndicator;
 
         if (hasFinished)
         {
             fitness += FINISH_REWARD;
-            fitness += -((agentToEvaluate.InitialDistance / finishTime) * FITNESS_SPEED_SCALE); // evaluate average speed of the agent
+            fitness += (agentToEvaluate.InitialDistance / finishTime) * FITNESS_SPEED_SCALE; // evaluate average speed of the agent
         }
 
         return fitness;
@@ -281,6 +285,7 @@ public class GameManager : MonoBehaviour
     public async void StartEvolution()
     {
         evolutionEvaluationData = new();
+        IsEvolutionActive = true;
 
         for (int i = 0; i < evolutionCycles; i++)
         {
@@ -293,7 +298,7 @@ public class GameManager : MonoBehaviour
 
         if (saveEvaluationDataEvolution)
         {
-            evolutionEvaluationData._info = $"A total of {evolutionCycles} cycles, each trained for {epochsCount} epochs, with a total of {activeAgents.Count} agents.";
+            evolutionEvaluationData._info = $"A total of {evolutionCycles} cycles, each trained for {epochsCount} epochs, with a total of {activeAgents.Count} agents, for a total of {evolutionTimer / 60f} minutes.";
             evolutionEvaluationData._additionalNotes = additionalNotes;
 
             var hiddenLayerStructureName = "";
@@ -309,29 +314,39 @@ public class GameManager : MonoBehaviour
         }
 
         startEvolutionButton.gameObject.SetActive(true);
+        statusText.text = "Finished!";
+        IsEvolutionActive = false;
     }
 
     private void GeneticEngineering(NeuralNetwork[] fittestNetworks, float fitnessDifference, float highestCompletionPercentage)
     {
         var j = 0;
-        var highestCompletionPercentageInverted = relativeMutationStrength.Evaluate(highestCompletionPercentage);
+        var highestCompletionPercentageInverted = relativeMutationRate.Evaluate(highestCompletionPercentage);
         var noImprovementMutationStrengthDivider = Mathf.Clamp(numberOfEpochsWithoutImprovementCounter, 1f, 1f + (highestCompletionPercentage * MAX_MUTATION_STRENGTH_DIVIDER)); // less mutation the further the agents get
 
         if (fitnessDifference < 0f) // => no improvement from last generation => mutate amount based on how many epochs went by without improvement
         {
             foreach (var agent in activeAgents)
             {
-                if (j < (activeAgents.Count / 6))
+                if (j < (activeAgents.Count / 7))
                 {
                     // elitism 
                     agent.SetAI(fittestNetworks[0]);
-                    agent.AI.Mutate(0.1f, 0.1f); // minimal mutation
+                    agent.SetUIHeader("Elite");
+                }
+                else if (j < (activeAgents.Count / 3))
+                {
+                    // mutation
+                    agent.SetAI(fittestNetworks[0]);
+                    agent.AI.Mutate(highestCompletionPercentageInverted);
+                    agent.SetUIHeader("Mutation");
                 }
                 else
                 {
                     // mutation
                     agent.SetAI(fittestNetworks[Random.Range(0, fittestNetworks.Length)]);
-                    agent.AI.Mutate(1f, highestCompletionPercentageInverted / (float)noImprovementMutationStrengthDivider);
+                    agent.AI.Mutate(highestCompletionPercentageInverted / noImprovementMutationStrengthDivider);
+                    agent.SetUIHeader("Controlled Mutation");
                 }
 
                 j++;
@@ -341,22 +356,25 @@ public class GameManager : MonoBehaviour
         {
             foreach (var agent in activeAgents)
             {
-                if (j < (activeAgents.Count / 4))
-                {
-                    // crossovers
-                    agent.SetAI(fittestNetworks[0].Crossover(fittestNetworks[Random.Range(0, fittestNetworks.Length)], 0.4f));
-                }
-                else if (j < (activeAgents.Count / 2) * 2)
-                {
-                    // elitism
-                    agent.SetAI(fittestNetworks[Random.Range(0, fittestNetworks.Length)]);
-                    agent.AI.Mutate(0.3f, highestCompletionPercentageInverted);
-                }
-                else
+                if (j < (activeAgents.Count / 7))
                 {
                     // elitism
                     agent.SetAI(fittestNetworks[0]);
-                    agent.AI.Mutate(0.1f, 0.05f); // minimal mutation
+                    agent.SetUIHeader("Elite");
+                }
+                else if (j < (activeAgents.Count / 2))
+                {
+                    // mutation
+                    agent.SetAI(fittestNetworks[Random.Range(0, fittestNetworks.Length)]);
+                    agent.AI.Mutate(highestCompletionPercentageInverted);
+                    agent.SetUIHeader("Mutation");
+                }
+                else
+                {
+                    // elitism & mutation
+                    agent.SetAI(fittestNetworks[0]);
+                    agent.AI.Mutate(highestCompletionPercentageInverted); // minimal mutation
+                    agent.SetUIHeader("Mutation");
                 }
 
                 j++;
@@ -369,18 +387,23 @@ public class GameManager : MonoBehaviour
 
                 if (j < (activeAgents.Count / 6))
                 {
-                    // crossover & mutate to preserve some diversity
-                    agent.SetAI(fittestNetworks[0].Crossover(fittestNetworks[Random.Range(0, fittestNetworks.Length)], 0.2f));
+                    // preserve some diversity
+                    agent.SetAI(fittestNetworks[Random.Range(0, fittestNetworks.Length)]);
+                    agent.AI.Mutate(0.2f);
+                    agent.SetUIHeader("Diversity");
                 }
-                else if (j < (activeAgents.Count / 4))
+                else if (j < (activeAgents.Count / 3))
                 {
                     // set the basis for the next generation
                     agent.SetAI(fittestNetworks[0]);
-                    agent.AI.Mutate(0.2f, highestCompletionPercentageInverted / 2f);
+                    agent.AI.Mutate(highestCompletionPercentageInverted);
+                    agent.SetUIHeader("Mutation");
                 }
                 else
                 {
+                    // elitism
                     agent.SetAI(fittestNetworks[0]);
+                    agent.SetUIHeader("Elite");
                 }
 
                 j++;
@@ -395,7 +418,6 @@ public class GameManager : MonoBehaviour
         var fitnessDifference = 0f;
         var highestCompletionPercentage = 0f;
         numberOfEpochsWithoutImprovementCounter = 0;
-        IsEvolutionActive = true;
 
         NeuralNetwork[] fittestNetworks = new NeuralNetwork[3];
 
@@ -508,9 +530,6 @@ public class GameManager : MonoBehaviour
         eval.fittestNetwork = new SerializedNetworkData(fittestNetworks[0]);
 
         evolutionEvaluationData.Evaluations.Add(eval);
-
-        IsEvolutionActive = false;
-        statusText.text = "Finished!";
     }
 
     #endregion
