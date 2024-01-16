@@ -38,7 +38,7 @@ namespace Default
         private int skippedFrames;
 
         public const int INFERENCE_FRAMES_TO_SKIP = 2;
-        public const int INPUT_NEURONS = 8;
+        public const int INPUT_NEURONS = 7;
         public const int OUTPUT_NEURONS = 3;
         public const float BOOST_CONFIDENCE_THRESHHOLD = 0.7f;
         public const float STUCK_MAX_TIMER = 12f;
@@ -236,12 +236,12 @@ namespace Default
             }
 
             // add normalized & inverted car speed
-            NNInputBuffer[sensorData.Length] = GetCurrentSpeedNormalized();
+            // NNInputBuffer[sensorData.Length] = GetCurrentSpeedNormalized();
 
             // add direction indicators for right and left
             (float rightIndicator, float leftIndicator) = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
-            NNInputBuffer[sensorData.Length + 1] = rightIndicator;
-            NNInputBuffer[sensorData.Length + 2] = leftIndicator;
+            NNInputBuffer[sensorData.Length] = rightIndicator;
+            NNInputBuffer[sensorData.Length + 1] = leftIndicator;
 
             return NNInputBuffer;
         }

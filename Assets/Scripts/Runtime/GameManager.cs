@@ -34,6 +34,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int[] networkHiddenLayerStructure_Evolution;
     [SerializeField] private int[] networkHiddenLayerStructure_Training;
 
+    [Header("Config - AI General"), Space]
+    [SerializeField, Tooltip("How much facing the wrong direction impacts the fitness.")] private float directionIndicatorFitnessPenaltyWeight = 5f;
+
     [Header("Config - Backpropagation Training"), Space]
     [SerializeField] private bool startWithRandomizedNetworks;
     [SerializeField] private bool saveConvergedModels;
@@ -134,9 +137,9 @@ public class GameManager : MonoBehaviour
         var fitness = 0f;
         var hasFinished = finishTime >= 0.5f;
 
-        // var rightIndicator = 1f - agentToEvaluate.NNInputBuffer[^1];
-        // var leftIndicator = 1f - agentToEvaluate.NNInputBuffer[^2];
-        // fitness -= rightIndicator + leftIndicator;
+        var rightIndicator = 1f - agentToEvaluate.NNInputBuffer[^1];
+        var leftIndicator = 1f - agentToEvaluate.NNInputBuffer[^2];
+        fitness -= (rightIndicator + leftIndicator) * directionIndicatorFitnessPenaltyWeight;
 
         fitness += completedPercentage * FITNESS_DISTANCE_SCALE;
         fitness += hasCrashed ? -CRASH_PENALTY : 0f;
