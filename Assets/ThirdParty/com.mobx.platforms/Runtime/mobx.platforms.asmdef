@@ -1,0 +1,25 @@
+{
+    "name": "mobx.platforms",
+    "rootNamespace": "MobX.Platforms",
+    "references": [
+        "GUID:451c7863c31cdec4fbc99d53f3082b53",
+        "GUID:60b317c0e9339ed42a02f571de4723cd",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:65a004a26c89ac5468e8d4b4b057f1c8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.xr",
+            "expression": "1.0.0",
+            "define": "UNITY_XR"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,25 @@
+{
+    "name": "mobx.utilities.unitask",
+    "rootNamespace": "MobX.Utilities",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:451c7863c31cdec4fbc99d53f3082b53"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "CYSHARP_UNITASK"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "1.0.0",
+            "define": "CYSHARP_UNITASK"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+{
+  "name": "com.mobx.utilities",
+  "version": "1.0.0",
+  "displayName": "Utilities",
+  "description": "Collection of non project specific utility. This includes generally applicable types, classes, extension methods, editors and more. ",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/mobx-gmbh/com.mobx.utilities",
+  "changelogUrl": "https://github.com/mobx-gmbh/com.mobx.utilities/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/mobx-gmbh/com.mobx.utilities/blob/main/LICENSE.md",
+  "keywords": [
+    "utility",
+    "extensions"
+  ],
+  "author": {
+    "name": "MobX",
+    "email": "jonathan@mobx.app",
+    "url": "https://github.com/mobx-gmbh"
+  },
+  "type": "tool"
+}

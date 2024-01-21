@@ -99,21 +99,21 @@ namespace DavidJalbert
                 carController.setMotor(0f);
                 carController.setSteering(0f);
                 carController.setBoostMultiplier(1f);
-                aiController.SetPositionAndRotation(GameManager.Instance.activeRaceTrack.spawn.position, GameManager.Instance.activeRaceTrack.spawn.rotation).Forget();
+                aiController.SetPositionAndRotation(TrainingManager.Instance.activeRaceTrack.spawn.position, TrainingManager.Instance.activeRaceTrack.spawn.rotation).Forget();
             }
 
             // collect training data 
-            if (Input.GetKeyDown(KeyCode.Space) && !GameManager.Instance.IsTrainingActive && !GameManager.Instance.IsEvolutionActive)
+            if (Input.GetKeyDown(KeyCode.Space) && !TrainingManager.Instance.IsTrainingActive && !TrainingManager.Instance.IsEvolutionActive)
             {
                 // toggle collecting
 
                 if (collectingTrainingData) //if toggle off => take training data buffer and train agents
                 {
-                    GameManager.Instance.TrainAgents(GameManager.Instance.TrainWithLocalBuffer ? trainingDataBuffer : data.TrainingData).Forget();
+                    TrainingManager.Instance.TrainAgents(TrainingManager.Instance.TrainWithLocalBuffer ? trainingDataBuffer : data.TrainingData).Forget();
                 }
                 else
                 {
-                    aiController?.SetTarget(GameManager.Instance.activeRaceTrack.GetRandomTargetAndActivateIt().position);
+                    aiController?.SetTarget(TrainingManager.Instance.activeRaceTrack.GetRandomTargetAndActivateIt().position);
                 }
 
                 collectingTrainingData = !collectingTrainingData;
@@ -132,7 +132,7 @@ namespace DavidJalbert
 
                     trainingDataBuffer.Add(dataset);
 
-                    if (GameManager.Instance.SaveLocalBufferToData)
+                    if (TrainingManager.Instance.SaveLocalBufferToData)
                     {
                         data.TrainingData.Add(dataset);
                     }

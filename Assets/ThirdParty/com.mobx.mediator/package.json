@@ -1,0 +1,28 @@
+{
+  "name": "com.mobx.mediator",
+  "version": "1.0.0",
+  "displayName": "Mediator",
+  "description": "Scriptable object based event and mediation system. ",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/mobx-gmbh/com.mobx.mediator",
+  "changelogUrl": "https://github.com/mobx-gmbh/com.mobx.mediator/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/mobx-gmbh/com.mobx.mediator/blob/main/LICENSE.md",
+  "dependencies": {
+    "com.mobx.utilities": "1.0.0",
+    "com.mobx.debug": "1.0.0"
+  },
+  "keywords": [
+    "event",
+    "event system",
+    "framework",
+    "scriptable object",
+    "mediator",
+    "medium"
+  ],
+  "author": {
+    "name": "MobX",
+    "email": "jonathan@mobx.app",
+    "url": "https://github.com/mobx-gmbh"
+  },
+  "type": "tool"
+}

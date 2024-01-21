@@ -1,0 +1,36 @@
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
+
+namespace MobX.Utilities.Editor.Helper
+{
+    public static partial class GUIHelper
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void IndentSpace()
+        {
+            var value = 10 * UnityEditor.EditorGUI.indentLevel;
+            GUILayout.Label("", GUILayout.Width(value));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Space()
+        {
+            UnityEditor.EditorGUILayout.Space();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Space(bool condition)
+        {
+            if (condition)
+            {
+                UnityEditor.EditorGUILayout.Space();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Space(float value)
+        {
+            UnityEditor.EditorGUILayout.Space(value);
+        }
+    }
+}

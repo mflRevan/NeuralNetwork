@@ -1,0 +1,23 @@
+{
+    "name": "mobx.mediator",
+    "rootNamespace": "MobX.Mediator",
+    "references": [
+        "GUID:451c7863c31cdec4fbc99d53f3082b53",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "1.0.0",
+            "define": "MEDIATOR_UNITASK"
+        }
+    ],
+    "noEngineReferences": false
+}

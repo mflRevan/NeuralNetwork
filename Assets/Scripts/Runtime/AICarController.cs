@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
@@ -36,6 +37,8 @@ namespace Default
         private float stuckTimer;
         private float driveTimer;
         private int skippedFrames;
+
+        public Action HasReset;
 
         public const int INFERENCE_FRAMES_TO_SKIP = 2;
         public const int INPUT_NEURONS = 7;
@@ -110,6 +113,8 @@ namespace Default
         {
             targetDirectionAgent.Reset();
             EnableDrivingAI(false);
+
+            HasReset?.Invoke();
         }
 
         public void OnFinish()

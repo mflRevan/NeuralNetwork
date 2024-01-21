@@ -25,7 +25,7 @@ namespace Default
         /// <returns>Returns the either the distance as float percentage (0 - 1), (1) being the max distance, or if the sensor is a curve detector it returns the curve direction encoded into 2 floats</returns>
         public float[] GetFeed()
         {
-            LayerMask mask = GameManager.Instance != null ? GameManager.Instance.RoadMask : LayerMask.GetMask("Road");
+            LayerMask mask = TrainingManager.Instance != null ? TrainingManager.Instance.RoadMask : LayerMask.GetMask("Road");
 
             var hit = new RaycastHit();
             var hitValid = false;
@@ -86,8 +86,8 @@ namespace Default
                     range = feed[1] - feed[0];
                     range *= SensorFeed.RANGE_CURVE;
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawLine(transform.position, transform.position + (transform.right * range));
-                    Gizmos.DrawLine(transform.position, transform.position + (transform.right * range));
+                    Gizmos.DrawLine(transform.position, transform.position + (0.25f * range * transform.right));
+                    Gizmos.DrawLine(transform.position, transform.position + (0.25f * range * transform.right));
                     break;
             }
         }

@@ -1,0 +1,18 @@
+{
+    "name": "mobx.utilities.editor",
+    "rootNamespace": "MobX.Utilities",
+    "references": [
+        "GUID:451c7863c31cdec4fbc99d53f3082b53"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+{
+    "name": "mobx.mediator.editor",
+    "rootNamespace": "Mobx.Mediator",
+    "references": [
+        "GUID:b36315b18db27a54aa4a0451d8b88701",
+        "GUID:451c7863c31cdec4fbc99d53f3082b53",
+        "GUID:60b317c0e9339ed42a02f571de4723cd"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

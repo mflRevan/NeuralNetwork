@@ -1,0 +1,25 @@
+{
+  "name": "com.mobx.platforms",
+  "version": "1.0.0",
+  "displayName": "Platforms",
+  "description": "Collection of non project specific platform setting files and utilities.",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/mobx-gmbh/com.mobx.utilities",
+  "changelogUrl": "https://github.com/mobx-gmbh/com.mobx.platform/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/mobx-gmbh/com.mobx.platform/blob/main/LICENSE.md",
+  "keywords": [
+    "utility",
+    "extensions",
+    "platform"
+  ],
+  "author": {
+    "name": "MobX",
+    "email": "jonathan@mobx.app",
+    "url": "https://github.com/mobx-gmbh"
+  },
+  "type": "tool",
+  "dependencies": {
+    "com.mobx.utilities": "1.0.0",
+    "com.mobx.debug": "1.0.0"
+  }
+}
