@@ -1,5 +1,8 @@
 [logo]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/title.png "Self Driving Car"
 [nn]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/nn.png "Neural Net Visual"
+[maintrack]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/maintrack.png "Main Track"
+[hierarchy]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/hierarchy.png "hierarchy"
+[preview]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/preview.gif "Preview"
 
 # Self-Driving Car Project in Unity
 
@@ -66,18 +69,29 @@ network.Mutate(chanceMultiplier, strengthMultiplier);
 
 ## Evaluating & Testing
 
+![Hierarchy][hierarchy]
 
+The main scene used for evaluating and testing the autonomous driving networks in appropriate environments can be found under _Assets/Scenes/RaceScene_. This scene contains 3 different racetracks and two managers (TestingManager.cs and TrainingManager.cs) visible in the hierarchy. These are responsible and can be used to train, evaluate, mutate and test Networks using an active population of AICarController instances in the scene. Upon evaluation or testing these agents will be initialized with neural networks.
 
-## Results & Observations
+## Previous Training & Testing
+
+#### The Main Track Used For Training
+
+![Train Track][maintrack]
+
+#### Results - Preview
+
+![Preview][preview]
+
+## Observations
 
 - Configuration Comparisons: Effectiveness of different NN structures.
 - Optimization Results: Insights into the evolutionary process and NN performance.
 - Improvements and Observations: Discussion of observed enhancements and potential areas for further development.
 
-## Conclusion & Outlook
+## Outlook
 
-- Project Review: Assessment of current progress compared to initial goals.
-- Future Work: Prospective enhancements and areas of further research.
+More content, training and configuration coming soon.
 
 ## Sources & Inspirations
 
