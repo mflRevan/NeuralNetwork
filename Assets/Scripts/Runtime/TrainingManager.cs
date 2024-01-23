@@ -260,7 +260,7 @@ public class TrainingManager : MonoBehaviour
             {
                 var layers = new List<int>();
 
-                layers.Add(AICarController.INPUT_NEURONS);
+                layers.Add(AICarController.BASE_INPUT_NEURONS);
 
                 for (int i = 0; i < networkHiddenLayerStructure_Evolution.Length; i++)
                 {

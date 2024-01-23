@@ -56,6 +56,7 @@ namespace Default
             await testingCar.SetPositionAndRotation(spawnPos, spawnRot);
             await testingCar.SetTarget(raceTracks[testTrackIndexClamped].targets[0].transform.position);
 
+            testingCar.SetInputBuffer(networkData.layers[0] >= 8);
             testingCar.SetAI(new NeuralNetwork(networkData));
             testingCar.SetUIHeader(carLabel);
             testingCar.EnableDrivingAI(true);

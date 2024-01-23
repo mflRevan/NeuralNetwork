@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -21,6 +22,7 @@ namespace Default
         [SerializeField] public float boostMultiplier = 2f;
 
         public NeuralNetwork AI { get; private set; }
+        public bool UseSpeedInfo { get; private set; }
         public bool AIDrivingEnabled { get; private set; }
         public float InitialDistance => initialDistance;
 
@@ -40,8 +42,8 @@ namespace Default
 
         public Action HasReset;
 
-        public const int INFERENCE_FRAMES_TO_SKIP = 2;
-        public const int INPUT_NEURONS = 7;
+        public const int INFERENCE_FRAMES_TO_SKIP = 0;
+        public const int BASE_INPUT_NEURONS = 7;
         public const int OUTPUT_NEURONS = 3;
         public const float BOOST_CONFIDENCE_THRESHHOLD = 0.7f;
         public const float STUCK_MAX_TIMER = 12f;
@@ -50,7 +52,7 @@ namespace Default
 
         private void Awake()
         {
-            NNInputBuffer = new float[INPUT_NEURONS];
+            NNInputBuffer = new float[BASE_INPUT_NEURONS];
 
             wallHitDetector.WallHit += OnWallHit;
         }
@@ -115,6 +117,13 @@ namespace Default
             EnableDrivingAI(false);
 
             HasReset?.Invoke();
+        }
+
+        public void SetInputBuffer(bool useSpeedInfo)
+        {
+            UseSpeedInfo = useSpeedInfo;
+
+            NNInputBuffer = new float[BASE_INPUT_NEURONS + (UseSpeedInfo ? 1 : 0)];
         }
 
         public void OnFinish()
@@ -194,7 +203,7 @@ namespace Default
         {
             var structure = new List<int>();
 
-            structure.Add(INPUT_NEURONS);
+            structure.Add(BASE_INPUT_NEURONS);
             structure.AddRange(hiddenLayerStructure);
             structure.Add(OUTPUT_NEURONS);
 
@@ -241,12 +250,15 @@ namespace Default
             }
 
             // add normalized & inverted car speed
-            // NNInputBuffer[sensorData.Length] = GetCurrentSpeedNormalized();
+            if (UseSpeedInfo)
+            {
+                NNInputBuffer[sensorData.Length] = GetCurrentSpeedNormalized();
+            }
 
             // add direction indicators for right and left
             (float rightIndicator, float leftIndicator) = EncodeDirectionIndicator(transform.forward, targetDirectionAgent.TargetDirection);
-            NNInputBuffer[sensorData.Length] = rightIndicator;
-            NNInputBuffer[sensorData.Length + 1] = leftIndicator;
+            NNInputBuffer[sensorData.Length + (UseSpeedInfo ? 1 : 0)] = rightIndicator;
+            NNInputBuffer[sensorData.Length + (UseSpeedInfo ? 2 : 1)] = leftIndicator;
 
             return NNInputBuffer;
         }
