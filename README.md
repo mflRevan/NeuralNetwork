@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Unity-based project integrates Neural Networks (NN) and Evolutionary Algorithms (EAs) to create a self-driving car simulation. By simulating natural selection, the project aims to optimize autonomous driving behaviors.
+This Unity-based project integrates Neural Networks (NNs) and Evolutionary Algorithms (EAs) to create a self-driving car simulation. By simulating natural selection, the project aims to optimize autonomous driving behaviors.
 
 ## Technology Stack
 
