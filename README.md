@@ -1,4 +1,8 @@
+[logo]: https://github.com/mflRevan/NeuralNetwork/blob/main/Public/title.png "Self Driving Car"
+
 # Self-Driving Car Project in Unity
+
+![Self Driving Car][logo]
 
 ## Introduction
 
