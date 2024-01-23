@@ -530,7 +530,7 @@ public class TrainingManager : MonoBehaviour
         }
 
         // save the fittest network of this evaluation löcycle
-        eval.fittestNetwork = new SerializedNetworkData(fittestNetworks[0]);
+        eval.fittestNetwork = new SerializableNetworkData(fittestNetworks[0]);
 
         evolutionEvaluationData.Evaluations.Add(eval);
     }

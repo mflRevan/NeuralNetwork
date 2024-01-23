@@ -47,7 +47,7 @@ public class EvolutionEvaluation
 {
     public List<int> LayerStructure;
     public List<float> FitnessConvergence;
-    public SerializedNetworkData fittestNetwork;
+    public SerializableNetworkData fittestNetwork;
 
     public EvolutionEvaluation()
     {
@@ -60,6 +60,6 @@ public class EvolutionEvaluation
         LayerStructure = new();
         FitnessConvergence = new();
 
-        this.fittestNetwork = new SerializedNetworkData(fittestNetwork);
+        this.fittestNetwork = new SerializableNetworkData(fittestNetwork);
     }
 }

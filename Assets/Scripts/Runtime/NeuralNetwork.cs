@@ -43,11 +43,11 @@ namespace Default
         }
 
         /// <summary>
-        /// Create Network from Json-Data
+        /// Create Network from Json-Data (Serialized Network Data)
         /// </summary>
         public NeuralNetwork(string jsonData)
         {
-            var data = JsonConvert.DeserializeObject<SerializedNetworkData>(jsonData);
+            var data = JsonConvert.DeserializeObject<SerializableNetworkData>(jsonData);
 
             this.layers = new int[data.layers.Length];
 
@@ -69,7 +69,7 @@ namespace Default
         /// <summary>
         /// Create Network from the SerializedNetworkData object
         /// </summary>
-        public NeuralNetwork(SerializedNetworkData networkData)
+        public NeuralNetwork(SerializableNetworkData networkData)
         {
             this.layers = new int[networkData.layers.Length];
 
@@ -494,7 +494,7 @@ namespace Default
 
         public string GetJsonData()
         {
-            var data = new SerializedNetworkData(this);
+            var data = new SerializableNetworkData(this);
             var jsonData = JsonConvert.SerializeObject(data);
 
             return jsonData;

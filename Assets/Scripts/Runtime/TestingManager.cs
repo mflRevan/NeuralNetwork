@@ -28,7 +28,7 @@ namespace Default
             carCamera.whatToFollow = testingCar.transform;
 
             string carLabel;
-            SerializedNetworkData networkData;
+            SerializableNetworkData networkData;
             int testTrackIndexClamped = Mathf.Clamp(testTrackIndex, 0, raceTracks.Count - 1);
 
             if (useEvaluationFile)
@@ -46,7 +46,7 @@ namespace Default
             }
             else
             {
-                networkData = JsonConvert.DeserializeObject<SerializedNetworkData>(testModelData);
+                networkData = JsonConvert.DeserializeObject<SerializableNetworkData>(testModelData);
                 carLabel = "";
                 // $"{string.Join(", ", networkData.layers)}_Fitness: {networkData.fitness}";
             }

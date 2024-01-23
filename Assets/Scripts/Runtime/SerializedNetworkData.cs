@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Default
 {
     [Serializable]
-    public class SerializedNetworkData
+    public class SerializableNetworkData
     {
         public int[] layers;
         public float[][] biases;
@@ -12,12 +12,12 @@ namespace Default
 
         public float fitness;
 
-        public SerializedNetworkData()
+        public SerializableNetworkData()
         {
-            
+
         }
 
-        public SerializedNetworkData(NeuralNetwork nn)
+        public SerializableNetworkData(NeuralNetwork nn)
         {
             fitness = nn.GetFitness();
 
