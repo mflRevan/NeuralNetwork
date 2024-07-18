@@ -7,18 +7,77 @@ using Newtonsoft.Json;
 
 namespace Default
 {
+    [Serializable]
+    public readonly struct WeightMutationTimestamp
+    {
+        public readonly float timeStamp;
+        public readonly float mutationMagnitude;
+
+        public WeightMutationTimestamp(float timeStamp, float mutationMagnitude)
+        {
+            this.timeStamp = timeStamp;
+            this.mutationMagnitude = mutationMagnitude;
+        }
+    }
+
+    [Serializable]
+    public class WeightMutationHistory
+    {
+        public CappedQueue<WeightMutationTimestamp> History;
+
+        private const int MAX_TRACKED_MUTATIONS = 8;
+
+        public WeightMutationHistory()
+        {
+            History = new(MAX_TRACKED_MUTATIONS);
+        }
+
+        public void ClearHistory()
+        {
+            History.Clear();
+        }
+    }
+
+    public class CappedQueue<T> : Queue<T>
+    {
+        public int MaxLength { get; private set; }
+
+        public CappedQueue(int maxLength)
+        {
+            if (maxLength < 1)
+                throw new ArgumentException("MaxLength must be at least 1", nameof(maxLength));
+
+            MaxLength = maxLength;
+        }
+
+        public new void Enqueue(T item)
+        {
+            // Check if adding another item would exceed the maxLength
+            while (this.Count >= MaxLength)
+            {
+                this.Dequeue(); // Remove the item at the front of the queue
+            }
+            base.Enqueue(item);
+        }
+    }
+
     // make network comparable for sorting purposes, f.e. sort by fitness and serializable for storing into a database
     [Serializable]
     public class NeuralNetwork : IComparable<NeuralNetwork>
     {
-        private const float DEFAULT_LEARNING_RATE = 0.4f;
+        private const float DEFAULT_LEARNING_RATE = 0.01f;
         private const float DEFAULT_WEIGHT_DECAY = 0.001f;
 
-        public int[] layers; //layers
-        public float[][] neurons; //neuron matix
-        public float[][] biases; //biases per neuron
-        public float[][][] weights; //weight matrix
+        // Default properties
+        public int[] layers; // layers
+        public float[][] neurons; // neuron matix
+        public float[][] biases; // biases per neuron
+        public float[][][] weights; // weight matrix
 
+        // Enhanced properties
+        public WeightMutationHistory[][][] weightMutationHistory;
+
+        // Backpropagation
         public float[][] desiredNeurons;
         public float[][] biasesSmudge;
         public float[][][] weightsSmudge;
@@ -223,12 +282,14 @@ namespace Default
 
             List<float[][]> weightsList = new(); //weights list which will later will converted into a weights 3D array
             List<float[][]> weightsSmudgeList = new(); //smudge list format only 
+            List<WeightMutationHistory[][]> weightMutationTimestampList = new();
 
             //itterate over all neurons that have a weight connection
             for (int i = 1; i < layers.Length; i++)
             {
                 List<float[]> layerWeightsList = new(); //layer weight list for this current layer (will be converted to 2D array)
                 List<float[]> layerWeightsSmudgeList = new();
+                List<WeightMutationHistory[]> layerWeightMutationTimestampList = new();
 
                 int neuronsInPreviousLayer = layers[i - 1];
 
@@ -237,24 +298,29 @@ namespace Default
                 {
                     float[] neuronWeights = new float[neuronsInPreviousLayer]; //neruons weights
                     float[] neuronWeightsSmudge = new float[neuronsInPreviousLayer];
+                    WeightMutationHistory[] neuronWeightMutationTimestamps = new WeightMutationHistory[neuronsInPreviousLayer];
 
                     //itterate over all neurons in the previous layer and set the weights randomly between 0.5f and -0.5
                     for (int k = 0; k < neuronsInPreviousLayer; k++)
                     {
                         //give random weights to neuron weights in the range of the xavier init function
                         neuronWeights[k] = UnityEngine.Random.Range(-xavierInit, xavierInit);
+                        neuronWeightMutationTimestamps[k] = new();
                     }
 
                     layerWeightsList.Add(neuronWeights); //add neuron weights of this current layer to layer weights
                     layerWeightsSmudgeList.Add(neuronWeightsSmudge);
+                    layerWeightMutationTimestampList.Add(neuronWeightMutationTimestamps);
                 }
 
                 weightsList.Add(layerWeightsList.ToArray()); //add this layers weights converted into 2D array into weights list
                 weightsSmudgeList.Add(layerWeightsSmudgeList.ToArray());
+                weightMutationTimestampList.Add(layerWeightMutationTimestampList.ToArray());
             }
 
             weights = weightsList.ToArray(); //convert to 3D array
             weightsSmudge = weightsSmudgeList.ToArray(); //convert to 3D array
+            weightMutationHistory = weightMutationTimestampList.ToArray(); //convert to 3D array
         }
 
         /// <summary>
@@ -346,7 +412,7 @@ namespace Default
                 {
                     var activationValue = i >= neurons.Length - 1 ? // only use sigmoid for the output layer
                         Sigmoid(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j])
-                        : ReLU(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
+                        : LeakyReLU(Sum(neurons[i - 1], weights[i - 1][j]) + biases[i][j]);
 
                     neurons[i][j] = activationValue;
                     desiredNeurons[i][j] = neurons[i][j];
@@ -360,6 +426,20 @@ namespace Default
             }
 
             return outputs; //return copy of activated output layer
+        }
+
+        public void ApplyGlobalWeightDecay(float weightDecay = DEFAULT_WEIGHT_DECAY)
+        {
+            for (int i = 0; i < weights.Length; i++)
+            {
+                for (int j = 0; j < weights[i].Length; j++)
+                {
+                    for (int k = 0; k < weights[i][j].Length; k++)
+                    {
+                        weights[i][j][k] *= 1f - weightDecay;
+                    }
+                }
+            }
         }
 
         private static float Sum(IEnumerable<float> values, IReadOnlyList<float> weights) =>
@@ -384,6 +464,22 @@ namespace Default
             return Math.Max(0f, value);
         }
 
+        public static float LeakyReLU(float x)
+        {
+            if (x >= 0)
+                return x;
+            else
+                return x / 20f;
+        }
+
+        public static float LeakyReLUDerivative(float x)
+        {
+            if (x >= 0)
+                return 1;
+            else
+                return 1f / 20f;
+        }
+
         public static float ReLUDerivative(float value)
         {
             return value > 0f ? 1f : 0f;
@@ -406,6 +502,11 @@ namespace Default
             return 0.2f * x + 0.5f;
         }
 
+        private float Stdp(float x, float timeWindow)
+        {
+            return Mathf.Exp(-(x / timeWindow));
+        }
+
         // determines the weight randomization range according to the Xavier (Glorot) Initialization, which considers the input and output size of the network
         private static float XavierInitialization(int numberInputNeurons, int numberOutputNeurons)
         {
@@ -413,9 +514,43 @@ namespace Default
         }
 
         /// <summary>
+        /// Reward or punish the network forcing it to adjust its weights based on previous Mutations (exploration)
+        /// </summary>
+        /// <param name="currentTime">The current time measured the same throughout the simulation</param>
+        /// <param name="rewardMultiplier">Multiplier for the corresponding adjustment (Negative multiplier to punish), should be above 1</param>
+        /// <param name="learningRate"></param>
+        public void Reward(float currentTime, float rewardMultiplier, float learningWindow, float learningRate = DEFAULT_LEARNING_RATE)
+        {
+            var mutationHistoryMedian = 0f;
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                for (int j = 0; j < weights[i].Length; j++)
+                {
+                    for (int k = 0; k < weights[i][j].Length; k++)
+                    {
+                        mutationHistoryMedian = 0f;
+
+                        // Create a timing dependent sum of all mutations
+                        foreach (var entry in weightMutationHistory[i][j][k].History)
+                        {
+                            mutationHistoryMedian += entry.mutationMagnitude * Stdp(currentTime - entry.timeStamp, learningWindow);
+                        }
+
+                        weights[i][j][k] *= rewardMultiplier > 0
+                            ? 1f + (rewardMultiplier * mutationHistoryMedian * learningRate)  // Reward
+                            : 1f - (Mathf.Abs(rewardMultiplier) * mutationHistoryMedian * learningRate); // Punish
+
+                        // weightMutationHistory[i][j][k].ClearHistory();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Mutate weights and biases, epochs without improvement increases the chance of mutation for every weight
         /// </summary>
-        public void Mutate(float chanceMultiplier = 1f, float strengthMultiplier = 1f)
+        public void Mutate(float currentTime = 0f, float chanceMultiplier = 1f)
         {
             for (int i = 0; i < weights.Length; i++)
             {
@@ -428,53 +563,67 @@ namespace Default
                         // mutate chance
                         float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-                        if (randomNumber <= 1f * chanceMultiplier) // 1% Chance * chancemultiplier
+                        if (randomNumber <= 8f * chanceMultiplier) // 8% Chance that something mutates * chancemultiplier
                         {
-                            weight *= -1; // flip
-                        }
-                        else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance * chancemultiplier
-                        {
-                            weight = UnityEngine.Random.Range(-0.5f, 0.5f); // reset 
-                        }
-                        else if (randomNumber <= 5f * chanceMultiplier) // 3% Chance * chancemultiplier
-                        {
-                            weight *= UnityEngine.Random.Range(1f, 2f); // multiplication 1 to 2
-                        }
-                        else if (randomNumber <= 8f * chanceMultiplier) // 3% Chance * chancemultiplier
-                        {
-                            weight *= UnityEngine.Random.Range(0.1f, 1f); // division by 1 to 0.1 and smaller depending on strengthmultiplier
+                            var oldWeight = weight;
+
+                            if (randomNumber <= 1f * chanceMultiplier) // 1% Chance * chancemultiplier
+                            {
+                                weight *= -1; // flip
+                            }
+                            else if (randomNumber <= 2f * chanceMultiplier) // 1% Chance * chancemultiplier
+                            {
+                                weight = UnityEngine.Random.Range(-0.5f, 0.5f); // reset 
+                            }
+                            else if (randomNumber <= 5f * chanceMultiplier) // 3% Chance * chancemultiplier
+                            {
+                                weight *= UnityEngine.Random.Range(1f, 2f); // multiplication 1 to 2
+                            }
+                            else
+                            {
+                                weight *= UnityEngine.Random.Range(0.1f, 1f); // division by 1 to 0.1 and smaller depending on strengthmultiplier
+                            }
+
+                            // Track mutation history
+                            weightMutationHistory[i][j][k].History.Enqueue(new WeightMutationTimestamp(currentTime, weight - oldWeight));
                         }
 
                         weights[i][j][k] = weight;
                     }
                 }
             }
+        }
 
-            // for (int i = 0; i < biases.Length; i++)
-            // {
-            //     for (int j = 0; j < biases[i].Length; j++)
-            //     {
-            //         float bias = biases[i][j];
+        /// <summary>
+        /// Mutate weights and biases, epochs without improvement increases the chance of mutation for every weight
+        /// </summary>
+        public void ControlledMutate(float currentTime = 0f, float chanceMultiplier = 1f, float mutationStrength = 0.1f)
+        {
+            for (int i = 0; i < weights.Length; i++)
+            {
+                for (int j = 0; j < weights[i].Length; j++)
+                {
+                    for (int k = 0; k < weights[i][j].Length; k++)
+                    {
+                        float weight = weights[i][j][k];
 
-            //         //mutate bias value 
-            //         float randomNumber = UnityEngine.Random.Range(0f, 100f);
+                        // mutate chance
+                        float randomNumber = UnityEngine.Random.Range(0f, 100f);
 
-            //         if (randomNumber <= 1f)
-            //         {
-            //             bias *= -1f;
-            //         }
-            //         else if (randomNumber <= 3f)
-            //         {
-            //             bias = UnityEngine.Random.Range(-0.5f, 0.5f);
-            //         }
-            //         else if (randomNumber <= 5f)
-            //         {
-            //             bias += UnityEngine.Random.Range(-1f, 1f);
-            //         }
+                        if (randomNumber <= 4f * chanceMultiplier) // 4% Chance that something mutates * chancemultiplier
+                        {
+                            var oldWeight = weight;
 
-            //         biases[i][j] = bias;
-            //     }
-            // }
+                            weight += UnityEngine.Random.Range(-mutationStrength, mutationStrength);
+
+                            // Track mutation history
+                            weightMutationHistory[i][j][k].History.Enqueue(new WeightMutationTimestamp(currentTime, weight - oldWeight));
+                        }
+
+                        weights[i][j][k] = weight;
+                    }
+                }
+            }
         }
 
         public void AddFitness(float fit)

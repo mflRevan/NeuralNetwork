@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DavidJalbert;
+using MobX.Utilities.Inspector;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -17,6 +17,19 @@ namespace Default
         [SerializeField] public TargetDirectionAgent targetDirectionAgent;
         [SerializeField] public WallHitDetector wallHitDetector;
         [SerializeField] public TMP_Text uiHeader;
+        [SerializeField] private Transform customTarget;
+        [SerializeField] private bool enableAdaptiveIntelligence;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField] private float learningRate = 0.001f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField] private float learningWindow = 10f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 1f)] private float globalDecay = 0.001f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 1f), Tooltip("0 for exploitation and 1 for full exploration")] private float qFactor = 0.5f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 1f)] private float mutationChanceMultiplier = 0.2f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 20f)] private float crashPunishmentMultiplier = 5f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 5f), Tooltip("Reward measured in units towards target passed since last interval reward")] private float distanceRewardMultiplier = 0.5f;
+        [ConditionalHide("enableAdaptiveIntelligence", false), SerializeField, Range(0f, 30f)] private float adaptiveRewardIntervalLength = 5f;
+        [SerializeField] private bool enableCustomData;
+        [ConditionalHide("enableCustomData", true), SerializeField] private int[] networkStructure;
+        [ConditionalHide("enableCustomData", false), SerializeField, TextArea] private string customNetworkData = "Insert network json data here";
 
         [Header("Config")]
         [SerializeField] public float boostMultiplier = 2f;
@@ -36,6 +49,7 @@ namespace Default
         private float initialDistance = 0f;
         private float lastFinishTime;
         private float furthestDistancePassed;
+        private float rewardTimer;
         private float stuckTimer;
         private float driveTimer;
         private int skippedFrames;
@@ -64,15 +78,21 @@ namespace Default
 
         private void FixedUpdate()
         {
-            // if (isPlayerController)
-            // {
-            //     var sensorData = Feed.GetSensorData();
-            //     print($"To the left: {sensorData[sensorData.Length - 1]}\nTo the right: {sensorData[sensorData.Length - 2]}");
-            // }
-
-            // if (isPlayerController) print(GetCurrentSpeedNormalized());
+            if (enableAdaptiveIntelligence && Input.GetKeyDown(KeyCode.S))
+            {
+                if (AIDrivingEnabled)
+                {
+                    Reset();
+                }
+                else
+                {
+                    StartWithCustomData();
+                }
+            }
 
             if (!AIDrivingEnabled || AI == null || !targetDirectionAgent.HasTarget()) { return; }
+
+            driveTimer += Time.fixedDeltaTime;
 
             if (skippedFrames >= INFERENCE_FRAMES_TO_SKIP)
             {
@@ -84,31 +104,66 @@ namespace Default
                 skippedFrames++;
             }
 
-            driveTimer += Time.fixedDeltaTime;
-
-            // if car is "stuck" somewhere, reset
-            if (stuckTimer >= STUCK_MAX_TIMER)
-            {
-                Reset();
-            }
-
             var currentDistancePassed = initialDistance - targetDirectionAgent.GetCurrentDistanceToTarget();
 
-            if (currentDistancePassed < furthestDistancePassed + 10f)
+            if (enableAdaptiveIntelligence)
             {
-                stuckTimer += Time.fixedDeltaTime;
+                AI.ApplyGlobalWeightDecay(globalDecay);
+
+                if (UnityEngine.Random.Range(0f, 1f) < qFactor)
+                {
+                    AI.ControlledMutate(currentTime: Time.fixedTime, chanceMultiplier: mutationChanceMultiplier, mutationStrength: learningRate);
+                }
+
+                if (rewardTimer <= 0f)
+                {
+                    rewardTimer = adaptiveRewardIntervalLength;
+
+                    Debug.Log("Distance passed since last cycle: " + (currentDistancePassed - furthestDistancePassed));
+
+                    AI.Reward(Time.fixedTime, currentDistancePassed - furthestDistancePassed, learningWindow, learningRate: learningRate);
+
+                    furthestDistancePassed = currentDistancePassed;
+                }
+                else
+                {
+                    rewardTimer -= Time.fixedDeltaTime;
+                }
             }
             else
             {
-                furthestDistancePassed = currentDistancePassed;
-                stuckTimer = 0;
+                // if car is "stuck" somewhere, reset
+                if (stuckTimer >= STUCK_MAX_TIMER)
+                {
+                    Reset();
+                }
+
+
+                if (currentDistancePassed < furthestDistancePassed + 10f)
+                {
+                    stuckTimer += Time.fixedDeltaTime;
+                }
+                else
+                {
+                    furthestDistancePassed = currentDistancePassed;
+                    stuckTimer = 0;
+                }
             }
+
         }
 
         private void OnWallHit()
         {
-            Reset();
-            hasCrashedLastRun = true;
+            if (enableAdaptiveIntelligence)
+            {
+                AI.Reward(Time.fixedTime, -crashPunishmentMultiplier, learningWindow, learningRate: learningRate);
+                Debug.Log("Wall hit!");
+            }
+            else
+            {
+                Reset();
+                hasCrashedLastRun = true;
+            }
         }
 
         private void Reset()
@@ -117,6 +172,30 @@ namespace Default
             EnableDrivingAI(false);
 
             HasReset?.Invoke();
+        }
+
+        private void StartWithCustomData()
+        {
+            if (customTarget == null)
+            {
+                Debug.LogError("No valid data provided");
+                return;
+            }
+
+            // var structure = [BASE_INPUT_NEURONS, ,OUTPUT_NEURONS]
+
+            if (enableCustomData)
+            {
+                SetAI(customNetworkData);
+            }
+            else
+            {
+                SetAI(networkStructure);
+            }
+
+            SetInputBuffer(false);
+            SetTarget(customTarget.position).Forget();
+            EnableDrivingAI(true);
         }
 
         public void SetInputBuffer(bool useSpeedInfo)
@@ -228,6 +307,7 @@ namespace Default
             driveTimer = 0f;
             lastFinishTime = enable ? 0f : lastFinishTime; // reset the finishtime upon enabling the car
             hasCrashedLastRun = enable ? false : hasCrashedLastRun; // reset the crash indicator upon enabling the car
+            furthestDistancePassed = enable ? 0f : furthestDistancePassed; // reset the distance tracker upon enabling the car
 
             AIDrivingEnabled = enable;
             tinyCarController.setMotor(0f);
